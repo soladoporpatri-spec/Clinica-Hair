@@ -4,6 +4,8 @@
  */
 
 // --- CONFIGURAÇÕES E ESTADO GLOBAL ---
+const DEMO_MODE = window.__DASHBOARD_DEMO_MODE__ === true;
+
 (function applyStoredThemeEarly() {
     const savedDarkMode = localStorage.getItem('hair_dark_mode');
     const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
@@ -53,10 +55,10 @@ let dashboardIntervalsStarted = false;
 let deferredPwaInstallPrompt = null;
 
 let state = {
-    token: localStorage.getItem('hair_token'),
+    token: DEMO_MODE ? 'public-demo-session' : localStorage.getItem('hair_token'),
     user: { 
-        role: localStorage.getItem('hair_role') || 'admin', 
-        barberId: localStorage.getItem('hair_barberId') 
+        role: DEMO_MODE ? 'admin' : (localStorage.getItem('hair_role') || 'admin'),
+        barberId: DEMO_MODE ? null : localStorage.getItem('hair_barberId')
     },
     activeView: 'agenda',
     agenda: { today: [], future: [], all: [] },
@@ -75,8 +77,8 @@ let state = {
     isLoading: false,
     pendingDataReload: false,
     currentEditId: null,
-    storeName: localStorage.getItem('hair_store_name') || 'Painel',
-    businessType: localStorage.getItem('hair_business_type') || 'Barbershop',
+    storeName: DEMO_MODE ? 'Barbearia Demonstração' : (localStorage.getItem('hair_store_name') || 'Painel'),
+    businessType: DEMO_MODE ? 'Barbershop' : (localStorage.getItem('hair_business_type') || 'Barbershop'),
     barbeiros: [],
     servicos: [],
     servicosAll: [],
@@ -105,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.token) {
         mostrarDashboard();
     }
-    ensureServiceWorkerRegistration().catch(() => {});
+    if (!DEMO_MODE) ensureServiceWorkerRegistration().catch(() => {});
     updateNotificationPermissionButton();
     updatePwaInstallButton();
 });
@@ -570,10 +572,10 @@ function mostrarDashboard() {
     setTimeout(() => loadServicesManager(),    900);
     setTimeout(() => loadDiagnostics(),        1000);
     setTimeout(() => updateHealthStatus(),    1100);
-    setTimeout(() => initSignalR(),           1300);
+    if (!DEMO_MODE) setTimeout(() => initSignalR(), 1300);
 
     // Timers de sincronização são criados apenas uma vez
-    if (!dashboardIntervalsStarted) {
+    if (!DEMO_MODE && !dashboardIntervalsStarted) {
         dashboardIntervalsStarted = true;
         setInterval(() => { if (!document.hidden) loadData(); }, CONFIG.REFRESH_INTERVAL);
         setInterval(() => { if (!document.hidden) loadBotStatus(); }, CONFIG.BOT_STATUS_INTERVAL);
@@ -582,6 +584,9 @@ function mostrarDashboard() {
 }
 
 async function apiFetch(path, options = {}) {
+    if (DEMO_MODE && window.NytharDemoApi?.active) {
+        return window.NytharDemoApi.handle(path, options);
+    }
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs || CONFIG.API_TIMEOUT_MS);
     const headers = {
@@ -620,6 +625,10 @@ async function apiFetch(path, options = {}) {
 
 // --- REAL-TIME (SIGNALR) ---
 function initSignalR() {
+    if (DEMO_MODE) {
+        setRealtimeStatusUI('offline');
+        return;
+    }
     if (typeof signalR === 'undefined') {
         console.warn('SignalR não carregado. Notificações em tempo real desativadas.');
         setRealtimeStatusUI('offline');
@@ -5607,6 +5616,14 @@ async function salvarEdicao() {
 }
 
 async function updateHealthStatus() {
+    if (DEMO_MODE) {
+        const dot = document.getElementById('sidebarStatusDot');
+        const text = document.getElementById('sidebarStatusText');
+        if (dot) dot.className = 'status-dot bg-amber-500';
+        if (text) text.textContent = 'Demonstração local';
+        setApiStatusUI('online');
+        return;
+    }
     try {
         const headers = { 'ngrok-skip-browser-warning': 'true' };
         if (state.token) headers.Authorization = `Bearer ${state.token}`;

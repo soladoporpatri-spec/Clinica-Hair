@@ -24,13 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const pixWhatsapp = document.getElementById("pixWhatsapp");
     const pixStatus = document.getElementById("pixStatus");
     const tabButtons = document.querySelectorAll("[data-tab-target]");
-    const revealItems = document.querySelectorAll("[data-reveal]");
+    const revealItems = [...document.querySelectorAll("[data-reveal]")];
     const revealGroups = document.querySelectorAll(".quick-panel-grid, .services-grid, .pricing-grid, .clients-grid, .process-grid, .creative-grid, .impact-board");
-    const PIX_KEY = document.querySelector('meta[name="nythar-pix-key"]')?.content.trim() || "";
-    const SALES_WHATSAPP = (document.querySelector('meta[name="nythar-sales-whatsapp"]')?.content || "").replace(/\D/g, "");
-    const PIX_MERCHANT_NAME = "NYTHAR";
+    const PIX_KEY = document.querySelector('meta[name="patricio-pix-key"]')?.content.trim() || "";
+    const SALES_WHATSAPP = (document.querySelector('meta[name="patricio-sales-whatsapp"]')?.content || "").replace(/\D/g, "");
+    const PIX_MERCHANT_NAME = "PATRICIO";
     const PIX_CITY = "ANAPOLIS";
     const API_FALLBACK_BASE = "http://127.0.0.1:4000";
+    const IS_STATIC_SHOWCASE = window.location.hostname.endsWith("github.io");
     let lastFocusedElement = null;
 
     document.querySelectorAll("[data-sales-whatsapp]").forEach((link) => {
@@ -38,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link.hidden = true;
             return;
         }
-        const message = encodeURIComponent(link.dataset.whatsappMessage || "Quero conhecer a Nythar");
+        const message = encodeURIComponent(link.dataset.whatsappMessage || "Quero conhecer os produtos do Patricio");
         link.href = `https://wa.me/${SALES_WHATSAPP}?text=${message}`;
         link.target = "_blank";
         link.rel = "noopener noreferrer";
@@ -47,6 +48,174 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!prefersReducedMotion) {
         document.body.classList.add("motion-ready");
     }
+
+    const cursorAura = document.querySelector("[data-cursor-aura]");
+    const depthCity = document.querySelector("[data-depth-city]");
+    const parallaxLayers = [...document.querySelectorAll("[data-parallax-layer]")];
+    const depthTilts = [...document.querySelectorAll("[data-tilt]")];
+    const cardTilts = [...document.querySelectorAll(".quick-panel, .service-card, .pricing-card, .client-card, .process-step, .creative-card, .impact-card")];
+    const scrollSections = [...document.querySelectorAll("main > section:not(.service-strip)")];
+    const supportsFinePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const motionState = { targetX: 0, targetY: 0, currentX: 0, currentY: 0, scrollY: window.scrollY, frame: 0 };
+
+    scrollSections.forEach((section, index) => {
+        const sectionContent = [...section.children].find((child) => child.tagName === "DIV");
+        const heading = section.querySelector("h1, h2");
+        const title = (section.getAttribute("aria-label") || heading?.textContent || `Seção ${index + 1}`)
+            .replace(/\s+/g, " ")
+            .trim()
+            .slice(0, 58);
+
+        section.dataset.scrollSection = String(index + 1).padStart(2, "0");
+        section.style.setProperty("--section-order", index);
+        section.style.setProperty("--section-enter-x", `${index % 2 === 0 ? -24 : 24}px`);
+        sectionContent?.classList.add("section-shell");
+
+        const loader = document.createElement("div");
+        const loaderIndex = document.createElement("span");
+        const loaderTitle = document.createElement("strong");
+        const loaderLine = document.createElement("i");
+
+        loader.className = "section-loader";
+        loader.setAttribute("aria-hidden", "true");
+        loaderIndex.textContent = `CAPÍTULO ${String(index + 1).padStart(2, "0")}`;
+        loaderTitle.textContent = title;
+        loader.append(loaderIndex, loaderTitle, loaderLine);
+        section.append(loader);
+    });
+
+    const activateScrollSection = (section, index, revealSection = true) => {
+        scrollSections.forEach((item) => item.classList.toggle("is-section-active", item === section));
+        if (revealSection) section.classList.add("has-entered");
+
+        document.body.dataset.cityPhase = String(index % 4);
+        document.body.style.setProperty("--city-shift-x", `${((index % 5) - 2) * 34}px`);
+        document.body.style.setProperty("--city-lift", `${-(index % 4) * 8}px`);
+        document.body.style.setProperty("--city-turn", `${((index % 5) - 2) * .7}deg`);
+        depthCity?.setAttribute("data-active-section", String(index + 1).padStart(2, "0"));
+    };
+
+    if (scrollSections.length) {
+        activateScrollSection(scrollSections[0], 0, false);
+    }
+
+    if (!prefersReducedMotion && "IntersectionObserver" in window) {
+        const sectionVisibility = new Map(scrollSections.map((section) => [section, 0]));
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                sectionVisibility.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
+                if (entry.isIntersecting && entry.intersectionRatio >= .12) {
+                    entry.target.classList.add("has-entered");
+                }
+            });
+
+            const currentSection = [...sectionVisibility.entries()]
+                .sort((left, right) => right[1] - left[1])
+                .find(([, ratio]) => ratio > 0)?.[0];
+
+            if (currentSection) {
+                activateScrollSection(currentSection, scrollSections.indexOf(currentSection));
+            }
+        }, {
+            threshold: [0, .12, .28, .48, .68],
+            rootMargin: "-8% 0px -18% 0px"
+        });
+
+        scrollSections.forEach((section) => sectionObserver.observe(section));
+    } else {
+        scrollSections.forEach((section) => section.classList.add("has-entered"));
+        if (scrollSections.length) activateScrollSection(scrollSections[0], 0);
+    }
+
+    const renderParallax = () => {
+        motionState.currentX += (motionState.targetX - motionState.currentX) * .09;
+        motionState.currentY += (motionState.targetY - motionState.currentY) * .09;
+
+        parallaxLayers.forEach((layer) => {
+            const depth = Number(layer.dataset.depth || .1);
+            const scrollShift = Math.max(-34, Math.min(34, motionState.scrollY * -.012 * depth));
+            layer.style.setProperty("--parallax-x", `${motionState.currentX * depth * 42}px`);
+            layer.style.setProperty("--parallax-y", `${motionState.currentY * depth * 30 + scrollShift}px`);
+        });
+
+        scrollSections.forEach((section) => {
+            if (!section.classList.contains("has-entered")) return;
+            const rect = section.getBoundingClientRect();
+            const distanceFromCenter = rect.top + rect.height / 2 - window.innerHeight / 2;
+            const normalized = Math.max(-1, Math.min(1, distanceFromCenter / Math.max(window.innerHeight, 1)));
+            section.style.setProperty("--section-scroll-y", `${normalized * -14}px`);
+            section.style.setProperty("--section-scroll-rotate", `${normalized * -.38}deg`);
+        });
+
+        if (Math.abs(motionState.targetX - motionState.currentX) > .002 || Math.abs(motionState.targetY - motionState.currentY) > .002) {
+            motionState.frame = requestAnimationFrame(renderParallax);
+        } else {
+            motionState.frame = 0;
+        }
+    };
+
+    const requestParallaxFrame = () => {
+        if (motionState.frame || prefersReducedMotion) return;
+        motionState.frame = requestAnimationFrame(renderParallax);
+    };
+
+    const setTiltFromPointer = (element, event, strength) => {
+        const rect = element.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (event.clientX - rect.left) / Math.max(rect.width, 1)));
+        const y = Math.max(0, Math.min(1, (event.clientY - rect.top) / Math.max(rect.height, 1)));
+        element.style.setProperty("--tilt-x", `${(0.5 - y) * strength}deg`);
+        element.style.setProperty("--tilt-y", `${(x - 0.5) * strength}deg`);
+        element.style.setProperty("--tilt-lift", "-5px");
+        element.style.setProperty("--glare-x", `${x * 100}%`);
+        element.style.setProperty("--glare-y", `${y * 100}%`);
+    };
+
+    const resetTilt = (element) => {
+        element.style.setProperty("--tilt-x", "0deg");
+        element.style.setProperty("--tilt-y", "0deg");
+        element.style.setProperty("--tilt-lift", "0px");
+    };
+
+    if (!prefersReducedMotion && supportsFinePointer) {
+        document.body.classList.add("has-pointer");
+
+        window.addEventListener("pointermove", (event) => {
+            motionState.targetX = (event.clientX / Math.max(window.innerWidth, 1) - .5) * 2;
+            motionState.targetY = (event.clientY / Math.max(window.innerHeight, 1) - .5) * 2;
+            cursorAura?.style.setProperty("--aura-x", `${event.clientX}px`);
+            cursorAura?.style.setProperty("--aura-y", `${event.clientY}px`);
+            requestParallaxFrame();
+        }, { passive: true });
+
+        document.documentElement.addEventListener("mouseleave", () => {
+            motionState.targetX = 0;
+            motionState.targetY = 0;
+            document.body.classList.remove("has-pointer");
+            requestParallaxFrame();
+        });
+
+        document.documentElement.addEventListener("mouseenter", () => document.body.classList.add("has-pointer"));
+
+        depthTilts.forEach((element) => {
+            const strength = Number(element.dataset.tiltStrength || 8);
+            element.addEventListener("pointermove", (event) => setTiltFromPointer(element, event, strength));
+            element.addEventListener("pointerleave", () => resetTilt(element));
+        });
+
+        cardTilts.forEach((element) => {
+            element.addEventListener("pointerenter", () => element.classList.add("tilt-active"));
+            element.addEventListener("pointermove", (event) => setTiltFromPointer(element, event, 7));
+            element.addEventListener("pointerleave", () => {
+                resetTilt(element);
+                window.setTimeout(() => element.classList.remove("tilt-active"), 140);
+            });
+        });
+    }
+
+    window.addEventListener("scroll", () => {
+        motionState.scrollY = window.scrollY;
+        requestParallaxFrame();
+    }, { passive: true });
 
     const syncHeader = () => {
         if (!header) return;
@@ -84,7 +253,7 @@ document.addEventListener("DOMContentLoaded", () => {
             })
             .filter(Boolean)
             .reverse()
-            .find(({ section }) => section.offsetTop - 140 <= window.scrollY);
+            .find(({ section }) => section.getBoundingClientRect().top <= Math.min(window.innerHeight * .34, 280));
 
         navLinks.forEach((link) => link.classList.remove("is-active"));
         activeSection?.link.classList.add("is-active");
@@ -94,6 +263,10 @@ document.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("scroll", setActiveNav, { passive: true });
 
     const openLogin = () => {
+        if (IS_STATIC_SHOWCASE) {
+            window.location.href = "../demo/";
+            return;
+        }
         if (!loginModal) return;
         lastFocusedElement = document.activeElement;
         loginModal.hidden = false;
@@ -113,6 +286,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     openLoginButtons.forEach((button) => {
+        if (IS_STATIC_SHOWCASE) {
+            const textNode = [...button.childNodes].find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+            if (textNode) textNode.textContent = " Ver demonstração";
+        }
         button.addEventListener("click", openLogin);
     });
 
@@ -198,11 +375,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const buildPixPayload = ({ amount, description }) => {
         const cleanAmount = Number(amount || 0).toFixed(2);
-        const txid = `NYTHAR${Date.now().toString().slice(-12)}`.slice(0, 25);
+        const txid = `PATRICIO${Date.now().toString().slice(-12)}`.slice(0, 25);
         const merchantAccount =
             emvField("00", "br.gov.bcb.pix") +
             emvField("01", PIX_KEY) +
-            emvField("02", String(description || "Assinatura Nythar").slice(0, 25));
+            emvField("02", String(description || "Produto Patricio").slice(0, 25));
         const payloadWithoutCrc =
             emvField("00", "01") +
             emvField("26", merchantAccount) +
@@ -306,10 +483,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const openPix = (button) => {
         if (!pixModal) return;
-        const plan = button.dataset.pixPlan || "Assinatura Nythar";
+        const plan = button.dataset.pixPlan || "Produto digital";
         const price = Number(button.dataset.pixPrice || 0);
         const payload = PIX_KEY ? buildPixPayload({ amount: price, description: plan }) : "";
-        const whatsappText = encodeURIComponent(`Ola, fiz ou vou fazer o PIX da assinatura ${plan} da Nythar no valor de R$ ${price.toFixed(2).replace(".", ",")}. Segue o comprovante.`);
+        const whatsappText = encodeURIComponent(`Ola, fiz ou vou fazer o PIX do produto ${plan} com Patricio no valor de R$ ${price.toFixed(2).replace(".", ",")}. Segue o comprovante.`);
 
         if (pixPlanName) pixPlanName.textContent = plan;
         if (pixPlanPrice) {
@@ -331,7 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         setPixStatus(
             PIX_KEY
-                ? "Pagamento via PIX manual. Depois envie o comprovante para liberar a assinatura."
+                ? "Pagamento via PIX manual. Depois envie o comprovante para confirmar o pedido."
                 : "Defina a chave PIX e o WhatsApp comercial antes de oferecer este pagamento.",
             PIX_KEY ? "neutral" : "error"
         );
@@ -416,9 +593,23 @@ document.addEventListener("DOMContentLoaded", () => {
         button.addEventListener("click", () => activateTab(button));
     });
 
+    revealItems.forEach((item, index) => {
+        const isPortrait = item.classList.contains("patricio-portrait");
+        const isCopy = item.matches(".section-heading, .about-copy, .depth-copy, .creative-panel, .final-panel, .patricio-copy");
+        const isCard = item.matches(".quick-panel, .service-card, .pricing-card, .client-card, .process-step");
+        const direction = index % 2 === 0 ? -1 : 1;
+
+        item.style.setProperty("--reveal-x", isPortrait ? "58px" : isCopy ? "-48px" : isCard ? `${direction * 22}px` : "0px");
+        item.style.setProperty("--reveal-y", isCopy || isPortrait ? "12px" : isCard ? "46px" : "32px");
+        item.style.setProperty("--reveal-z", isCard ? "-44px" : "-24px");
+        item.style.setProperty("--reveal-rx", isCard ? "5deg" : "3deg");
+        item.style.setProperty("--reveal-rz", isCard ? `${direction * .7}deg` : "0deg");
+        item.style.setProperty("--reveal-scale", isCard ? ".965" : ".985");
+    });
+
     revealGroups.forEach((group) => {
         group.querySelectorAll("[data-reveal]").forEach((item, index) => {
-            item.style.setProperty("--reveal-delay", `${Math.min(index, 5) * 70}ms`);
+            item.style.setProperty("--reveal-delay", `${Math.min(index, 5) * 95}ms`);
         });
     });
 
@@ -429,7 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 entry.target.classList.add("is-visible");
                 observer.unobserve(entry.target);
             });
-        }, { threshold: 0.16, rootMargin: "0px 0px -8% 0px" });
+        }, { threshold: 0.12, rootMargin: "0px 0px -12% 0px" });
 
         revealItems.forEach((item) => revealObserver.observe(item));
     } else {

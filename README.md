@@ -6,11 +6,11 @@ O funcionamento é simples: o cliente conversa com o chatbot, escolhe o que prec
 
 ## Demonstração online
 
-[Abrir a demonstração pública](https://soladoporpatri-spec.github.io/Nythar-Dashboard-Chatbot/)
+[Abrir a landing page](https://soladoporpatri-spec.github.io/Nythar-Dashboard-Chatbot/) · [Abrir a dashboard real em modo demonstração](https://soladoporpatri-spec.github.io/Nythar-Dashboard-Chatbot/demo/)
 
-A versão online funciona inteiramente no navegador com dados fictícios. Ela permite criar agendamentos, testar o fluxo do chatbot e conferir agenda, clientes, serviços e relatórios sem enviar mensagens reais ou exigir credenciais.
+A versão online usa a mesma landing page e a mesma dashboard do projeto. No modo demonstração, os dados fictícios ficam somente no navegador: é possível criar agendamentos e conferir agenda, clientes, serviços e relatórios sem exigir credenciais.
 
-O WhatsApp real, o banco de dados e as automações do backend continuam disponíveis na instalação completa, pois precisam de processos permanentes que não fazem parte da demonstração estática.
+O WhatsApp real, o banco de dados e as automações do backend continuam disponíveis somente na instalação completa, pois precisam de processos permanentes que o GitHub Pages não executa.
 
 ## O que o sistema faz
 

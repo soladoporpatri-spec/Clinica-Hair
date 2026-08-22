@@ -20,13 +20,13 @@
     <!-- Formato tela cheia no iPhone -->
     <meta name="apple-touch-fullscreen" content="yes">
     <title>Nythar - Dashboard &amp; Chatbot</title>
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="/assets/pwa-192.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/pwa-192.png">
     <!-- apple-touch-icon: ícone adicionado à tela inicial do iPhone -->
-    <link rel="apple-touch-icon" href="/assets/pwa-192.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/assets/pwa-192.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="/assets/pwa-192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/pwa-192.png">
+    <link rel="apple-touch-icon" href="assets/pwa-192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/pwa-192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="assets/pwa-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/pwa-192.png">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -50,17 +50,20 @@
                 console.warn('Falha ao importar sessao da landing.', error);
             }
         })();
-        // Auth Guard: Verifica se o usuário está logado antes de renderizar qualquer coisa
-        if (!localStorage.getItem('hair_token')) {
+        const dashboardDemoMode = new URLSearchParams(window.location.search).get('demo') === '1';
+        window.__DASHBOARD_DEMO_MODE__ = dashboardDemoMode;
+        // Auth Guard: a demonstração pública usa dados locais e não cria uma sessão real.
+        if (!dashboardDemoMode && !localStorage.getItem('hair_token')) {
             window.location.href = 'login.html';
         }
         // Proteção: Superadmin não deve usar este painel operacional
-        if (localStorage.getItem('hair_role') === 'superadmin') {
+        if (!dashboardDemoMode && localStorage.getItem('hair_role') === 'superadmin') {
             window.location.href = 'superadmin/index.html';
         }
     </script>
     <script src="/assets/signalr.min.js?v=15"></script>
     <link rel="stylesheet" href="style-dashboard.css?v=17">
+    <link rel="stylesheet" href="demo/demo-runtime.css?v=1">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -2062,7 +2065,8 @@
                 </div>
             </div>
 
-    <audio id="notificationSound" src="/assets/notification.mp3" preload="auto"></audio>
-    <script src="script-dashboard.js?v=17" defer></script>
+    <audio id="notificationSound" src="assets/notification.mp3" preload="auto"></audio>
+    <script src="demo/demo-runtime.js?v=1"></script>
+    <script src="script-dashboard.js?v=18" defer></script>
 </body>
 </html>
