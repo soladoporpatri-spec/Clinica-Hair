@@ -1,0 +1,25 @@
+[Unit]
+Description=Barbearia ASP.NET Backend
+After=network.target
+StartLimitIntervalSec=0
+StartLimitBurst=0
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/barbearia/publish
+EnvironmentFile=/opt/barbearia/.env
+ExecStart=/usr/bin/dotnet /opt/barbearia/publish/WhatsAppBot.Worker.dll
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=30
+User=barbearia
+Group=barbearia
+NoNewPrivileges=true
+PrivateTmp=true
+LimitNOFILE=65535
+MemoryMax=1536M
+ReadWritePaths=/opt/barbearia/data /opt/barbearia/backups /opt/barbearia/logs /opt/barbearia/publish/logs
+
+[Install]
+WantedBy=multi-user.target

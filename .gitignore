@@ -1,0 +1,76 @@
+# Dependencias
+node_modules/
+WhatsAppBridge/node_modules/
+
+# Build e publicacao
+bin/
+obj/
+dist/
+tmpbuild/
+tmpbuild_publish/
+runtime/
+publish/
+output/
+release/
+WhatsAppBot.Worker/bin/
+WhatsAppBot.Worker/obj/
+
+# Segredos e credenciais locais
+.env
+.env.*
+!.env.example
+!deploy/.env.example
+CREDENCIAIS-ACESSO.txt
+*credentials*
+*credentials*.json
+
+# Bancos, sessoes e estado operacional
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/*
+!data/demo-barbearia.json
+!data/demo-otimizacao-pc.json
+!data/whatsapp-templates.json
+logs/
+backups/
+*.log
+WhatsAppBridge/.wwebjs_auth*/
+WhatsAppBridge/.wwebjs_cache*/
+.wwebjs_auth*/
+.wwebjs_cache*/
+
+# Pacotes e relatorios gerados
+*.zip
+*.7z
+*.tar.gz
+*.xlsx
+backend.out*
+
+# Configuracoes locais de agentes e editores
+.agents/
+.claude/
+.codex/
+.sixth/
+.vscode/
+.idea/
+
+# Variantes de clientes fora do produto principal
+Lavajato/
+
+# Temporarios locais
+temp-*
+create_test_appointments.py
+insert_test.sql
+test.html
+test-services.bat
+publish.bat
+push-notify.js
+start-reliable.bat
+pwa-maskable-512.png
+*.tmp
+*.bak
+Thumbs.db
+.DS_Store

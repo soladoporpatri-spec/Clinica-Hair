@@ -1,0 +1,25 @@
+[Unit]
+Description=Barbearia WhatsApp Bridge
+After=network.target barbearia-backend.service
+Requires=barbearia-backend.service
+StartLimitIntervalSec=0
+StartLimitBurst=0
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/barbearia/WhatsAppBridge
+EnvironmentFile=/opt/barbearia/.env
+ExecStart=/usr/bin/node /opt/barbearia/WhatsAppBridge/bridge-factory.js
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=45
+User=barbearia
+Group=barbearia
+NoNewPrivileges=true
+PrivateTmp=true
+LimitNOFILE=65535
+MemoryMax=2048M
+
+[Install]
+WantedBy=multi-user.target

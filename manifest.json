@@ -1,0 +1,50 @@
+{
+  "name": "Nythar - Dashboard & Chatbot",
+  "short_name": "Nythar",
+  "description": "Dashboard operacional para negócios locais: agenda, WhatsApp, clientes, relatórios e notificações.",
+  "id": "/dashboard-improved.html",
+  "start_url": "/dashboard-improved.html",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "any",
+  "background_color": "#211824",
+  "theme_color": "#211824",
+  "categories": ["business", "productivity"],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/assets/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/pwa-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agenda",
+      "short_name": "Agenda",
+      "url": "/dashboard-improved.html#agenda",
+      "icons": [{ "src": "/assets/pwa-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Bot WhatsApp",
+      "short_name": "Bot",
+      "url": "/dashboard-improved.html#bot",
+      "icons": [{ "src": "/assets/pwa-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

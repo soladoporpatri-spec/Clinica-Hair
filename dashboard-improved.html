@@ -1,0 +1,2068 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- viewport-fit=cover: suporte ao notch / Dynamic Island do iPhone -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Dashboard operacional Nythar para negócios locais: agenda, WhatsApp, clientes e relatórios.">
+    <meta name="author" content="Nythar">
+    <!-- theme-color: cor da barra de status no Android Chrome e Safari iOS 15+ -->
+    <meta name="theme-color" content="#211824" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0b1f36" media="(prefers-color-scheme: dark)">
+    <!-- PWA Android -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- PWA iOS / Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Nythar">
+    <!-- black-translucent: conteúdo fica sob a barra de status — safe-area-inset compensa -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Formato tela cheia no iPhone -->
+    <meta name="apple-touch-fullscreen" content="yes">
+    <title>Nythar - Dashboard &amp; Chatbot</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/pwa-192.png">
+    <!-- apple-touch-icon: ícone adicionado à tela inicial do iPhone -->
+    <link rel="apple-touch-icon" href="/assets/pwa-192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/pwa-192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/assets/pwa-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/pwa-192.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        (function importLandingSession() {
+            const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+            const raw = hash.get('nytharSession');
+            if (!raw) return;
+            try {
+                const data = JSON.parse(decodeURIComponent(atob(raw)));
+                if (data.token) localStorage.setItem('hair_token', data.token);
+                if (data.role) localStorage.setItem('hair_role', data.role);
+                if (data.barberId) localStorage.setItem('hair_barberId', data.barberId);
+                if (data.storeId) localStorage.setItem('hair_storeId', data.storeId);
+                if (data.storeName) localStorage.setItem('hair_store_name', data.storeName);
+                if (data.businessType) localStorage.setItem('hair_business_type', data.businessType);
+                if (data.bridgeUrl) localStorage.setItem('hair_bridge_url', data.bridgeUrl);
+                history.replaceState(null, document.title, window.location.pathname + window.location.search);
+            } catch (error) {
+                console.warn('Falha ao importar sessao da landing.', error);
+            }
+        })();
+        // Auth Guard: Verifica se o usuário está logado antes de renderizar qualquer coisa
+        if (!localStorage.getItem('hair_token')) {
+            window.location.href = 'login.html';
+        }
+        // Proteção: Superadmin não deve usar este painel operacional
+        if (localStorage.getItem('hair_role') === 'superadmin') {
+            window.location.href = 'superadmin/index.html';
+        }
+    </script>
+    <script src="/assets/signalr.min.js?v=15"></script>
+    <link rel="stylesheet" href="style-dashboard.css?v=17">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    keyframes: {
+                        shake: {
+                            '0%, 100%': { transform: 'translateX(0)' },
+                            '25%': { transform: 'translateX(-6px)' },
+                            '50%': { transform: 'translateX(6px)' },
+                            '75%': { transform: 'translateX(-6px)' },
+                        }
+                    },
+                    animation: {
+                        shake: 'shake 0.4s cubic-bezier(.36,.07,.19,.97) both',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="dashboard-saas dashboard-v3">
+    <!-- Notificações Toast (Canto inferior direito) -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-40 space-y-2"></div>
+
+    <!-- Centro de Notificações -->
+    <div id="notificationCenter" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4">
+        <div class="modal-surface bg-white rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto shadow-2xl p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-black text-gray-950">Notificações</h2>
+                <button onclick="closeNotificationCenter()" class="btn btn-light px-3 py-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="notificationList" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="mainDash" class="app-shell dashboard-layout dashboard-grid-v2 lg:grid lg:grid-cols-[280px_1fr]">
+        <!-- Sidebar -->
+        <aside class="sidebar app-sidebar sidebar-v2 p-4 lg:min-h-screen">
+            <div class="flex items-center justify-between lg:block">
+                <div class="flex items-center gap-3 px-2 py-2">
+                    <button onclick="document.getElementById('logoUpload').click()" class="brand-mark w-11 h-11 rounded-lg bg-gradient-to-br from-[#172033] to-[#0f1728] text-white flex items-center justify-center overflow-hidden hover:shadow-lg transition-shadow" title="Alterar logo">
+                        <img id="logoImg" alt="Logo" class="hidden w-full h-full object-cover">
+                        <i id="logoIcon" class="fas fa-scissors text-lg"></i>
+                    </button>
+                    <input type="file" id="logoUpload" accept="image/*" class="hidden" onchange="setLogo(event)">
+                    <div>
+                        <h1 id="sidebarStoreName" class="font-black text-gray-950 leading-tight">Minha loja</h1>
+                        <p class="text-xs text-gray-500 font-bold">Operação local</p>
+                    </div>
+                </div>
+                <button onclick="doLogout()" class="lg:hidden btn btn-light px-3 py-2">
+                    <i class="fas fa-right-from-bracket"></i>
+                </button>
+            </div>
+
+            <nav class="mt-5 lg:mt-8 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-2">
+                <button class="nav-item active px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="agenda" onclick="showView('agenda')">
+                    <i class="fas fa-calendar-days w-5"></i>
+                    <span class="nav-copy"><span>Agenda</span><small>Hoje e próximos</small></span>
+                </button>
+                <button class="nav-item hidden px-3 py-3 text-left font-bold flex items-center gap-3" data-tech-nav="true" data-view-button="tech-overview" onclick="showView('tech-overview')">
+                    <i class="fas fa-gauge-high w-5"></i>
+                    <span class="nav-copy"><span>Visão geral</span><small>Operação do dia</small></span>
+                </button>
+                <button class="nav-item hidden px-3 py-3 text-left font-bold flex items-center gap-3" data-tech-nav="true" data-view-button="tech-queue" onclick="showView('tech-queue')">
+                    <i class="fas fa-list-check w-5"></i>
+                    <span class="nav-copy"><span>Fila de otimizações</span><small>Status e checklist</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="clientes" onclick="showView('clientes')">
+                    <i class="fas fa-address-book w-5"></i>
+                    <span class="nav-copy"><span>Clientes</span><small>Histórico e retorno</small></span>
+                </button>
+                <button class="nav-item hidden px-3 py-3 text-left font-bold flex items-center gap-3" data-tech-nav="true" data-view-button="tech-devices" onclick="showView('tech-devices')">
+                    <i class="fas fa-computer w-5"></i>
+                    <span class="nav-copy"><span>Computadores</span><small>Equipamentos</small></span>
+                </button>
+                <button class="nav-item hidden px-3 py-3 text-left font-bold flex items-center gap-3" data-tech-nav="true" data-view-button="tech-services" onclick="showView('tech-services')">
+                    <i class="fas fa-screwdriver-wrench w-5"></i>
+                    <span class="nav-copy"><span>Serviços</span><small>Pacotes</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="bot" onclick="showView('bot')">
+                    <i class="fab fa-whatsapp w-5"></i>
+                    <span class="nav-copy"><span>WhatsApp</span><small>Conexão e QR Code</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="diagnostico" onclick="showView('diagnostico')">
+                    <i class="fas fa-stethoscope w-5"></i>
+                    <span class="nav-copy"><span>Diagnóstico</span><small>Prontidão da loja</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="automacoes" onclick="showView('automacoes')">
+                    <i class="fas fa-message w-5"></i>
+                    <span class="nav-copy"><span>Automações</span><small>Mensagens do bot</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="relatorios" onclick="showView('relatorios')">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span class="nav-copy"><span>Relatórios</span><small>Receita e presença</small></span>
+                </button>
+                <button class="nav-item hidden px-3 py-3 text-left font-bold flex items-center gap-3" data-tech-nav="true" data-view-button="tech-reports" onclick="showView('tech-reports')">
+                    <i class="fas fa-chart-simple w-5"></i>
+                    <span class="nav-copy"><span>Relatórios</span><small>Tickets e receita</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="configuracoes" onclick="showView('configuracoes')">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="nav-copy"><span>Ajustes</span><small>Loja e horários</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="calendario" onclick="showView('calendario')">
+                    <i class="fas fa-calendar-week w-5"></i>
+                    <span class="nav-copy"><span>Calendário</span><small>Visão semanal</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" data-view-button="assinaturas" onclick="showView('assinaturas')" id="navAssinaturas" style="display:none">
+                    <i class="fas fa-crown w-5"></i>
+                    <span class="nav-copy"><span>Fidelidade</span><small>Planos e membros</small></span>
+                </button>
+                <button class="nav-item px-3 py-3 text-left font-bold flex items-center gap-3" id="darkModeToggle">
+                    <i class="fas fa-moon w-5"></i>
+                    <span class="nav-copy"><span>Modo escuro</span><small>Conforto visual</small></span>
+                </button>
+            </nav>
+
+            <div class="hidden lg:block mt-8 soft-panel p-4">
+                <div class="flex items-center gap-2 text-sm font-black text-gray-800">
+                    <span id="sidebarStatusDot" class="status-dot bg-gray-300"></span>
+                    <span id="sidebarStatusText">Verificando</span>
+                </div>
+                <p id="last-update" class="text-xs text-gray-500 font-semibold mt-2">-</p>
+            </div>
+
+            <button onclick="doLogout()" class="hidden lg:flex btn btn-light w-full py-3 mt-4">
+                <i class="fas fa-right-from-bracket"></i> Sair
+            </button>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="dashboard-main p-4 md:p-6 lg:p-8">
+            <!-- Header -->
+            <header class="app-header flex flex-col xl:flex-row xl:items-center justify-between gap-4 mb-6">
+                <div class="page-heading">
+                    <p class="text-xs font-black text-blue-600 uppercase tracking-widest header-section-label">Operação</p>
+                    <h2 id="pageTitle" class="text-2xl md:text-3xl font-black text-gray-950 tracking-tight leading-tight">Agenda operacional</h2>
+                    <p id="pageSubtitle" class="text-sm text-gray-500 font-semibold mt-1">Controle os cortes do dia, próximos horários e bloqueios.</p>
+                </div>
+                <!-- Command bar: actions primárias visíveis no mobile, secundárias ocultas -->
+                <div class="command-bar command-bar-v2 panel px-3 py-2.5 flex flex-wrap items-center gap-2">
+                    <!-- Status: compacto, oculto em mobile pequeno -->
+                    <div id="status-api" class="cmdbar-status flex items-center gap-1.5 text-xs font-bold text-gray-600 cmd-secondary">
+                        <span class="status-dot bg-gray-300 w-2 h-2"></span>API
+                    </div>
+                    <div id="status-realtime" class="cmdbar-status flex items-center gap-1.5 text-xs font-bold text-gray-600 cmd-secondary">
+                        <span class="status-dot bg-gray-300 w-2 h-2"></span>RT
+                    </div>
+                    <div class="cmdbar-divider hidden md:block w-px h-5 bg-gray-200 mx-1 cmd-secondary"></div>
+                    <!-- Ações primárias: sempre visíveis -->
+                    <button onclick="openManualAppointmentModal()" class="btn btn-green px-3 py-2 text-sm" id="btnAgendar">
+                        <i class="fas fa-calendar-plus"></i><span class="hidden xs:inline ml-1">Agendar</span>
+                    </button>
+                    <button onclick="atualizarDashboard()" class="btn btn-blue px-3 py-2 text-sm" id="btnAtualizar">
+                        <i class="fas fa-rotate"></i><span class="hidden xs:inline ml-1">Atualizar</span>
+                    </button>
+                    <!-- Busca + filtro: agrupados -->
+                    <div class="relative cmdbar-search">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                        <input type="text" id="agendaSearch" placeholder="Buscar cliente..." class="input-field py-2 pl-8 pr-3 text-sm font-semibold w-36 md:w-44" oninput="debounce(renderAgenda, 300)()">
+                    </div>
+                    <select id="barberFilter" class="input-field py-2 text-sm font-bold w-40 hidden" onchange="loadData()">
+                        <option value="">Todos</option>
+                    </select>
+                    <!-- Ações secundárias: ocultas em mobile -->
+                    <button onclick="openUnavailableDayModal()" class="btn btn-light px-3 py-2 text-sm cmd-secondary">
+                        <i class="fas fa-ban"></i><span class="ml-1">Bloquear</span>
+                    </button>
+                    <button onclick="openNotificationCenter()" class="btn btn-light px-3 py-2 text-sm notification-center-badge" data-count="0" title="Notificações">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                    <button onclick="enablePersistentNotifications()" id="notificationPermissionBtn" class="btn btn-light px-3 py-2 text-sm cmd-secondary" title="Alertas sonoros">
+                        <i class="fas fa-volume-high"></i>
+                    </button>
+                    <button onclick="installPwaApp()" id="pwaInstallBtn" class="btn btn-light px-3 py-2 text-sm hidden" title="Instalar app">
+                        <i class="fas fa-mobile-screen-button"></i>
+                    </button>
+                    <button onclick="exportExcel()" class="btn btn-light px-3 py-2 text-sm cmd-secondary" title="Exportar Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </button>
+                    <button onclick="syncGoogleSheets()" class="btn btn-light px-3 py-2 text-sm cmd-secondary" title="Sincronizar Sheets">
+                        <i class="fas fa-table"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Seção Agenda -->
+            <section id="view-agenda" class="view active workspace-view">
+                <!-- ── Abas mobile (ocultas em xl+) ──────────────────────────── -->
+                <div class="agenda-tabs-bar xl:hidden mb-4 panel p-1 flex gap-1" id="agendaTabsBar">
+                    <button id="agendaTabHoje"
+                        class="agenda-tab active flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-black"
+                        onclick="switchAgendaTab('hoje')">
+                        <i class="fas fa-calendar-check text-xs"></i>
+                        Hoje
+                        <span id="agendaTabHojeCount" class="agenda-tab-badge">0</span>
+                    </button>
+                    <button id="agendaTabFuturos"
+                        class="agenda-tab flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold"
+                        onclick="switchAgendaTab('futuros')">
+                        <i class="fas fa-calendar-days text-xs"></i>
+                        <span data-biz="proximos">Próximos</span>
+                        <span id="agendaTabFuturosCount" class="agenda-tab-badge">0</span>
+                    </button>
+                </div>
+
+                <!-- ── Painéis: side-by-side em xl, abas em mobile ───────────── -->
+                <div class="grid xl:grid-cols-[1fr_1.1fr] gap-6 mb-6">
+                    <div class="panel p-5 agenda-panel tab-active" id="agendaPanelHoje">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <h3 class="text-base font-black text-gray-950 leading-tight">Hoje</h3>
+                                    <p id="todayDateLabel" class="text-xs text-gray-400 font-semibold mt-0.5"></p>
+                                </div>
+                                <button id="agendaDensityBtn" onclick="toggleAgendaDensity()"
+                                        class="btn btn-light px-2.5 py-1 text-xs flex items-center gap-1.5"
+                                        title="Alternar modo compacto">
+                                    <i id="agendaDensityIcon" class="fas fa-compress-alt"></i>
+                                    <span id="agendaDensityLabel">Compacto</span>
+                                </button>
+                            </div>
+                            <button onclick="openManualAppointmentModal()" title="Novo agendamento"
+                                    class="btn btn-green px-3 py-1.5 text-xs flex items-center gap-1.5">
+                                <i class="fas fa-plus"></i>
+                                <span class="hidden sm:inline">Agendar</span>
+                            </button>
+                        </div>
+                        <div id="hoje" class="space-y-3 min-h-[200px]"></div>
+                    </div>
+                    <div class="panel p-5 agenda-panel" id="agendaPanelFuturos">
+                        <div class="flex items-center justify-between gap-4 mb-4 pb-3 border-b border-gray-100">
+                            <div>
+                                <h3 class="text-base font-black text-gray-950 leading-tight" data-biz="proximos">Próximos</h3>
+                                <p class="text-xs text-gray-400 font-semibold mt-0.5" data-biz="agendamentosFuturos">agendamentos futuros</p>
+                            </div>
+                            <select id="futureFilter" class="input-field max-w-[130px] py-1.5 text-sm font-bold" onchange="renderAgenda()">
+                                <option value="all">Todos</option>
+                                <option value="7">7 dias</option>
+                                <option value="30">30 dias</option>
+                            </select>
+                        </div>
+                        <div id="futuros" class="space-y-3 overflow-y-auto pr-1 agenda-futuros-list"></div>
+                    </div>
+                </div>
+
+                <!-- Cards de Resumo (secundário: abaixo dos agendamentos) -->
+                <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Hoje</p>
+                            <i class="fas fa-calendar-day text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-3xl font-black text-gray-950 mt-1 leading-none" id="countHoje">0</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5" id="countHojeConfirmados">— confirmados</p>
+                    </div>
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide" data-biz="proximos">Próximos</p>
+                            <i class="fas fa-clock text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-3xl font-black text-gray-950 mt-1 leading-none" id="countFuturos">0</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5" id="countFuturosLabel">agendamentos</p>
+                    </div>
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Faturamento</p>
+                            <i class="fas fa-circle-dollar-to-slot text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-2xl font-black text-gray-950 mt-1 leading-none" id="totalFaturamento">R$ 0</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5">previsto hoje + futuros</p>
+                    </div>
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Tempo hoje</p>
+                            <i class="fas fa-hourglass-half text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-3xl font-black text-gray-950 mt-1 leading-none" id="tempoTotal">0min</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5" data-biz="atendimento">em atendimentos</p>
+                    </div>
+                </div>
+
+                <div class="owner-dashboard-grid mb-6">
+                    <div class="panel p-5 section-panel owner-summary-card">
+                        <div class="owner-card-header">
+                            <div>
+                                <p class="owner-eyebrow">Painel do dono</p>
+                                <h3>Resumo da operação de hoje</h3>
+                                <p id="ownerSummaryText">Carregando agenda, WhatsApp e configuração da loja...</p>
+                            </div>
+                            <span id="ownerReadinessBadge" class="owner-readiness-badge">Verificando</span>
+                        </div>
+
+                        <div class="owner-metric-grid">
+                            <div class="owner-metric">
+                                <p>Atendimentos</p>
+                                <strong id="cockpitTodayCount">0</strong>
+                                <small id="cockpitNextTime">sem próximo horário</small>
+                            </div>
+                            <div class="owner-metric">
+                                <p>Receita hoje</p>
+                                <strong id="cockpitTodayRevenue">R$ 0</strong>
+                                <small id="cockpitPendingCount">0 pendentes</small>
+                            </div>
+                            <div class="owner-metric">
+                                <p>WhatsApp</p>
+                                <strong id="cockpitWhatsAppStatus">Verificando</strong>
+                                <small id="cockpitBotStatus">bot em análise</small>
+                            </div>
+                            <div class="owner-metric">
+                                <p>Serviço mais marcado</p>
+                                <strong id="cockpitTopService">-</strong>
+                                <small id="cockpitTopServiceCount">sem dados</small>
+                            </div>
+                        </div>
+
+                        <div class="owner-actions">
+                            <button onclick="openManualAppointmentModal()" class="btn btn-green px-4 py-2 text-sm"><i class="fas fa-calendar-plus"></i>Novo agendamento</button>
+                            <button onclick="showView('clientes')" class="btn btn-light px-4 py-2 text-sm"><i class="fas fa-user-plus"></i>Ver clientes</button>
+                            <button onclick="showView('configuracoes'); setTimeout(()=>document.getElementById('servicesManagerList')?.scrollIntoView({behavior:'smooth'}),200)" class="btn btn-light px-4 py-2 text-sm"><i class="fas fa-scissors"></i>Novo serviço</button>
+                            <button onclick="showView('bot'); loadBotStatus(true)" class="btn btn-blue px-4 py-2 text-sm"><i class="fab fa-whatsapp"></i>Conectar/testar WhatsApp</button>
+                        </div>
+                    </div>
+
+                    <div class="panel p-5 section-panel owner-checklist-card">
+                        <div class="owner-checklist-header">
+                            <div>
+                                <h3>Checklist de implantação</h3>
+                                <p>Mostra o que falta para a loja operar sozinha.</p>
+                            </div>
+                            <span id="onboardingProgress">0/8</span>
+                        </div>
+                        <div id="onboardingChecklist" class="owner-checklist-list"></div>
+                    </div>
+                </div>
+
+                <div class="panel p-5 mb-6 section-panel">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <div>
+                            <h3 class="text-lg font-black text-gray-950">Dias indisponíveis</h3>
+                            <p class="text-xs text-gray-500 font-bold">Bloqueios aparecem automaticamente no bot, enquetes e agenda manual.</p>
+                        </div>
+                        <button onclick="openUnavailableDayModal()" class="btn btn-light px-4 py-2 text-sm">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div id="unavailableDaysList" class="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
+                        <div class="col-span-full flex items-center gap-2 py-3 text-gray-400 text-sm font-semibold"><i class="fas fa-spinner fa-spin text-xs"></i> Carregando...</div>
+                    </div>
+                </div>
+                  <!-- Seção de Gerenciamento de Barbeiros -->
+<div id="sectionBarbeiros" class="panel team-panel mt-6">
+    <div class="card-header flex justify-between items-center p-5">
+        <h5 class="text-lg font-black text-gray-950" data-biz="equipe">Equipe profissional</h5>
+        <button id="btnNovoBarbeiro" onclick="openBarberModal()" class="btn btn-blue px-4 py-2 text-sm">
+            <i class="fas fa-plus"></i> <span data-biz="novoProfissional">Novo profissional</span>
+        </button>
+    </div>
+    <div class="card-body">
+        <div id="barber-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <!-- Os profissionais serão carregados aqui via JS -->
+        </div>
+    </div>
+</div>
+            </section>
+
+            <!-- Seção Tecnologia: Visão geral -->
+            <section id="view-tech-overview" class="view">
+                <div class="tech-remote-hero mb-6">
+                    <div>
+                        <span class="tech-remote-kicker"><i class="fas fa-signal"></i> Operação 100% remota</span>
+                        <h3>Otimização de computadores, do diagnóstico à entrega</h3>
+                        <p>Cadastre o cliente, prepare a sessão remota e acompanhe o resultado sem etapas desnecessárias.</p>
+                    </div>
+                    <button onclick="openOptimizationTicketModal()" class="btn tech-primary-action">
+                        <i class="fas fa-bolt"></i> Iniciar atendimento
+                    </button>
+                </div>
+                <div class="tech-journey mb-6" aria-label="Fluxo do atendimento remoto">
+                    <div><span>1</span><strong>Triagem rápida</strong><small>Cliente, objetivo e computador</small></div>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    <div><span>2</span><strong>Sessão remota</strong><small>Diagnóstico e otimização segura</small></div>
+                    <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    <div><span>3</span><strong>Revisão e entrega</strong><small>Checklist, resultado e orientação</small></div>
+                </div>
+                <div class="grid xl:grid-cols-[1.25fr_.85fr] gap-6 mb-6">
+                    <div class="panel p-5 section-panel">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-5">
+                            <div>
+                                <p class="text-xs font-black text-cyan-600 uppercase tracking-widest">Synth Optimizer</p>
+                                <h3 class="text-2xl font-black text-gray-950 mt-1">Atendimentos em andamento</h3>
+                                <p class="text-sm text-gray-500 font-semibold mt-1">Prioridades, sessões remotas e entregas em uma visão objetiva.</p>
+                            </div>
+                            <button onclick="openOptimizationTicketModal()" class="btn btn-green px-4 py-2 text-sm">
+                                <i class="fas fa-plus"></i>Novo atendimento
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+                            <div class="soft-panel p-4">
+                                <p class="text-[11px] font-black text-gray-500 uppercase tracking-wide">Atendimentos hoje</p>
+                                <strong id="techMetricToday" class="block text-2xl font-black text-gray-950 mt-1">0</strong>
+                                <small class="text-xs font-semibold text-gray-500">criados no dia</small>
+                            </div>
+                            <div class="soft-panel p-4">
+                                <p class="text-[11px] font-black text-gray-500 uppercase tracking-wide">Em otimização</p>
+                                <strong id="techMetricRunning" class="block text-2xl font-black text-gray-950 mt-1">0</strong>
+                                <small class="text-xs font-semibold text-gray-500">em execução</small>
+                            </div>
+                            <div class="soft-panel p-4">
+                                <p class="text-[11px] font-black text-gray-500 uppercase tracking-wide">Faturamento previsto</p>
+                                <strong id="techMetricRevenue" class="block text-xl font-black text-gray-950 mt-1">R$ 0</strong>
+                                <small class="text-xs font-semibold text-gray-500">tickets abertos</small>
+                            </div>
+                            <div class="soft-panel p-4">
+                                <p class="text-[11px] font-black text-gray-500 uppercase tracking-wide">Prontos</p>
+                                <strong id="techMetricReady" class="block text-2xl font-black text-gray-950 mt-1">0</strong>
+                                <small class="text-xs font-semibold text-gray-500">para entrega</small>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <div class="flex items-center justify-between gap-3 mb-3">
+                                <h4 class="font-black text-gray-950">Fila rápida</h4>
+                                <button onclick="showView('tech-queue')" class="btn btn-light px-3 py-1.5 text-xs">Abrir fila</button>
+                            </div>
+                            <div id="techQuickQueue" class="grid gap-3"></div>
+                        </div>
+                    </div>
+                    <div class="panel p-5 section-panel">
+                        <div class="flex items-center justify-between gap-3 mb-4">
+                            <div>
+                                <h3 class="text-lg font-black text-gray-950">Prontidão da operação</h3>
+                                <p class="text-xs text-gray-500 font-bold">O essencial para atender remotamente com segurança.</p>
+                            </div>
+                            <span id="techReadinessBadge" class="px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-black uppercase">Verificando</span>
+                        </div>
+                        <div id="techSetupChecklist" class="space-y-2 text-sm"></div>
+                        <div class="mt-5 border-t border-slate-100 pt-4">
+                            <h4 class="font-black text-gray-950 mb-2">Entrada pelo WhatsApp</h4>
+                            <p id="techWhatsAppStatus" class="text-sm font-bold text-gray-600">Verificando conexão...</p>
+                            <button onclick="showView('bot'); loadBotStatus(true)" class="btn btn-blue px-4 py-2 text-sm mt-3">
+                                <i class="fab fa-whatsapp"></i> Testar bot
+                            </button>
+                        </div>
+                        <div class="mt-5 border-t border-slate-100 pt-4">
+                            <h4 class="font-black text-gray-950 mb-2">Alertas</h4>
+                            <div id="techAlerts" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção Tecnologia: Fila -->
+            <section id="view-tech-queue" class="view">
+                <div class="panel p-5 mb-6">
+                    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-black text-cyan-600 uppercase tracking-widest">Operação</p>
+                            <h3 class="text-2xl font-black text-gray-950 mt-1">Fila de otimizações</h3>
+                            <p class="text-sm text-gray-500 font-semibold mt-1">Acompanhe triagem, execução, revisão e entrega de cada computador.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="techQueueStatusFilter" class="input-field font-bold min-w-44" onchange="renderOptimizationQueue()">
+                                <option value="">Todos os status</option>
+                                <option value="Novo">Novo</option>
+                                <option value="Triagem">Triagem</option>
+                                <option value="Agendado">Agendado</option>
+                                <option value="AguardandoCliente">Aguardando cliente</option>
+                                <option value="EmOtimizacao">Em otimização</option>
+                                <option value="EmRevisao">Em revisão</option>
+                                <option value="Pronto">Pronto</option>
+                                <option value="Concluido">Concluído</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                            <button onclick="openOptimizationTicketModal()" class="btn btn-green px-4 py-2 text-sm"><i class="fas fa-plus"></i>Novo atendimento</button>
+                        </div>
+                    </div>
+                    <div class="mt-4 relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                        <input id="techQueueSearch" class="input-field pl-9 font-semibold" placeholder="Buscar por cliente, telefone, pacote ou problema..." oninput="renderOptimizationQueue()">
+                    </div>
+                </div>
+                <div id="techQueueList" class="grid xl:grid-cols-2 gap-4"></div>
+            </section>
+
+            <!-- Seção Tecnologia: Computadores -->
+            <section id="view-tech-devices" class="view">
+                <div class="panel p-5 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-black text-cyan-600 uppercase tracking-widest">Equipamentos</p>
+                            <h3 class="text-2xl font-black text-gray-950 mt-1">Computadores</h3>
+                            <p class="text-sm text-gray-500 font-semibold mt-1">Cadastro leve para entender o atendimento, sem virar inventário de hardware.</p>
+                        </div>
+                        <button onclick="openOptimizationDeviceModal()" class="btn btn-green px-4 py-2 text-sm"><i class="fas fa-plus"></i>Novo computador</button>
+                    </div>
+                    <div class="mt-4 relative">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                        <input id="techDeviceSearch" class="input-field pl-9 font-semibold" placeholder="Buscar por cliente, telefone, processador ou GPU..." oninput="renderOptimizationDevices()">
+                    </div>
+                </div>
+                <div id="techDeviceList" class="grid xl:grid-cols-2 gap-4"></div>
+            </section>
+
+            <!-- Seção Tecnologia: Serviços -->
+            <section id="view-tech-services" class="view">
+                <div class="panel p-5 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-black text-cyan-600 uppercase tracking-widest">Catálogo remoto</p>
+                            <h3 class="text-2xl font-black text-gray-950 mt-1">Serviços claros, fáceis de vender</h3>
+                            <p class="text-sm text-gray-500 font-semibold mt-1">Cada pacote mostra duração, valor e objetivo. Um clique já abre o atendimento com o serviço selecionado.</p>
+                        </div>
+                        <button onclick="openServiceModal()" class="btn btn-green px-4 py-2 text-sm"><i class="fas fa-plus"></i>Novo pacote</button>
+                    </div>
+                </div>
+                <div id="techServicesManagerList" class="grid md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+            </section>
+
+            <!-- Seção Tecnologia: Relatórios -->
+            <section id="view-tech-reports" class="view">
+                <div class="panel p-5 mb-6">
+                    <div>
+                        <p class="text-xs font-black text-cyan-600 uppercase tracking-widest">Relatórios</p>
+                        <h3 class="text-2xl font-black text-gray-950 mt-1">Performance da otimização</h3>
+                        <p class="text-sm text-gray-500 font-semibold mt-1">Resumo simples de tickets, receita, pacote mais solicitado, status e modalidade.</p>
+                    </div>
+                </div>
+                <div id="techReportsGrid" class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6"></div>
+                <div class="grid xl:grid-cols-2 gap-6">
+                    <div class="panel p-5">
+                        <h4 class="font-black text-gray-950 mb-3">Tickets por status</h4>
+                        <div id="techReportStatusList" class="space-y-2"></div>
+                    </div>
+                    <div class="panel p-5">
+                        <h4 class="font-black text-gray-950 mb-3">Modalidade de atendimento</h4>
+                        <div id="techReportModeList" class="space-y-2"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção Clientes / CRM avançado -->
+            <section id="view-clientes" class="view">
+                <div class="panel p-5 mb-6">
+                    <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-black text-emerald-600 uppercase tracking-widest">CRM avançado</p>
+                            <h3 class="text-2xl font-black text-gray-950 mt-1">Relacionamento com clientes</h3>
+                            <p class="text-sm text-gray-500 font-semibold mt-1">Histórico real da agenda, tags, preferências, retorno e ações manuais pelo WhatsApp.</p>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 min-w-full xl:min-w-[620px]">
+                            <div class="soft-panel p-3"><small class="font-black text-gray-500 uppercase text-[10px]">Clientes</small><strong id="crmTotalClients" class="block text-xl font-black text-gray-950">0</strong></div>
+                            <div class="soft-panel p-3"><small class="font-black text-gray-500 uppercase text-[10px]">Recorrentes</small><strong id="crmRecurringClients" class="block text-xl font-black text-gray-950">0</strong></div>
+                            <div class="soft-panel p-3"><small class="font-black text-gray-500 uppercase text-[10px]">Sumidos/risco</small><strong id="crmInactiveClients" class="block text-xl font-black text-gray-950">0</strong></div>
+                            <div class="soft-panel p-3"><small class="font-black text-gray-500 uppercase text-[10px]">VIP/fieis</small><strong id="crmVipClients" class="block text-xl font-black text-gray-950">0</strong></div>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid lg:grid-cols-[1.4fr_180px_180px_180px_180px] gap-3">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                            <input id="crmSearch" class="input-field pl-9 font-semibold" placeholder="Buscar por nome, telefone, serviço ou profissional..." oninput="renderClientsView()">
+                        </div>
+                        <select id="crmStatusFilter" class="input-field font-bold" onchange="renderClientsView()">
+                            <option value="">Todos</option>
+                            <option value="novo">Novos</option>
+                            <option value="recorrente">Recorrentes</option>
+                            <option value="fiel">Fieis</option>
+                            <option value="vip">VIP</option>
+                            <option value="sumido">Sumidos</option>
+                            <option value="em_risco">Em risco</option>
+                            <option value="inativo">Inativos</option>
+                            <option value="bloqueado">Bloqueados</option>
+                        </select>
+                        <select id="crmTagFilter" class="input-field font-bold" onchange="renderClientsView()">
+                            <option value="">Todas as tags</option>
+                        </select>
+                        <select id="crmReturnFilter" class="input-field font-bold" onchange="renderClientsView()">
+                            <option value="">Todos retornos</option>
+                            <option value="inactive">Sumidos / risco</option>
+                            <option value="no-next">Sem próximo horário</option>
+                            <option value="no-show">Com falta</option>
+                            <option value="reminder">Com lembrete</option>
+                        </select>
+                        <select id="crmServiceFilter" class="input-field font-bold" onchange="renderClientsView()">
+                            <option value="">Todos os serviços</option>
+                        </select>
+                    </div>
+                    <div class="mt-4 grid sm:grid-cols-3 gap-3">
+                        <div class="soft-panel p-3"><small class="font-black text-gray-500 uppercase text-[10px]">Receita CRM</small><strong id="crmRevenue" class="block text-lg font-black text-gray-950">R$ 0</strong></div>
+                        <div class="soft-panel p-3"><small class="font-black text-gray-500 uppercase text-[10px]">Sem próximo horário</small><strong id="crmNoNextClients" class="block text-lg font-black text-gray-950">0</strong></div>
+                        <div class="soft-panel p-3"><small class="font-black text-gray-500 uppercase text-[10px]">Lembretes pendentes</small><strong id="crmPendingReminders" class="block text-lg font-black text-gray-950">0</strong></div>
+                    </div>
+                </div>
+                <div id="clientsList" class="grid xl:grid-cols-2 gap-4"></div>
+            </section>
+
+            <!-- Seção Bot WhatsApp -->
+            <section id="view-bot" class="view">
+                <div class="grid xl:grid-cols-[1.1fr_.9fr] gap-6">
+                    <div class="panel p-6">
+                        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-3 mb-2">
+                                    <h3 class="text-2xl font-black text-gray-950">Bot WhatsApp</h3>
+                                    <span id="botStatusBadge" class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-black uppercase">Verificando</span>
+                                </div>
+                                <p id="botStatusText" class="text-gray-600 font-semibold">Carregando status do WhatsApp...</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="toggleBot()" id="botToggleBtn" class="btn btn-green px-4 py-3">
+                                    <i class="fas fa-power-off"></i> Ativar
+                                </button>
+                                <button onclick="loadBotStatus(true)" class="btn btn-blue px-4 py-3" id="qrBtn">
+                                    <i class="fas fa-qrcode"></i> QR
+                                </button>
+                                <button onclick="reconnectBot(this)" class="btn btn-light px-4 py-3" id="reconnectBtn" title="Recuperar somente o WhatsApp desta loja sem apagar a sessão">
+                                    <i class="fas fa-rotate"></i> Reconectar
+                                </button>
+                                <button onclick="disconnectBot(this)" class="btn btn-red px-4 py-3" id="disconnectBtn">
+                                    <i class="fas fa-link-slash"></i> Desconectar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Banner: bot pausado — visível apenas quando botEnabled = false -->
+                        <div id="botPausedBanner" class="hidden mt-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-start gap-3">
+                            <i class="fas fa-pause-circle text-amber-500 text-lg mt-0.5 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-sm font-black text-amber-800">Bot pausado — não está respondendo clientes</p>
+                                <p class="text-xs text-amber-700 font-semibold mt-0.5">Durante a pausa, <strong>apenas a última mensagem de cada cliente é guardada</strong>. Ao reativar, somente essa última mensagem é reenviada para processamento — mensagens anteriores são descartadas.</p>
+                            </div>
+                        </div>
+
+                        <!-- Painel de conexão com abas QR / Código -->
+                        <div id="botQrPanel" class="hidden mt-6 soft-panel p-5">
+                            <!-- Abas -->
+                            <div class="flex gap-1 mb-5 border-b border-gray-200">
+                                <button id="tabQr" onclick="switchConnectTab('qr')"
+                                    class="px-5 py-2 text-sm font-black border-b-2 border-gray-950 text-gray-950 -mb-px">
+                                    <i class="fas fa-qrcode mr-1"></i> QR Code
+                                </button>
+                                <button id="tabCode" onclick="switchConnectTab('code')"
+                                    class="px-5 py-2 text-sm font-bold text-gray-400 -mb-px border-b-2 border-transparent">
+                                    <i class="fas fa-mobile-screen-button mr-1"></i> Código por número
+                                </button>
+                            </div>
+
+                            <!-- Aba QR Code -->
+                            <div id="connectTabQr" class="grid md:grid-cols-[220px_1fr] gap-6 items-center">
+                                <div class="bg-white rounded-lg p-3 shadow-sm mx-auto border border-gray-200">
+                                    <img id="botQrImage" alt="QR Code do WhatsApp" class="w-48 h-48 object-contain">
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-black text-gray-950 mb-1">Escanear QR Code</h4>
+                                    <div id="botQrTime" class="text-sm text-gray-500 font-bold mb-4"></div>
+                                    <ol class="space-y-2 text-sm font-bold text-gray-700">
+                                        <li class="flex gap-2"><span class="text-blue-600">1.</span><span>Abra o WhatsApp no celular da loja.</span></li>
+                                        <li class="flex gap-2"><span class="text-blue-600">2.</span><span>Toque em <strong>Aparelhos conectados → Conectar aparelho</strong>.</span></li>
+                                        <li class="flex gap-2"><span class="text-blue-600">3.</span><span>Aponte a câmera para o QR e aguarde o status ficar online.</span></li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <!-- Aba Código por número -->
+                            <div id="connectTabCode" class="hidden">
+                                <div class="grid md:grid-cols-2 gap-6 items-start">
+                                    <!-- Formulário -->
+                                    <div>
+                                        <h4 class="text-lg font-black text-gray-950 mb-1">Parear por número</h4>
+                                        <p class="text-sm text-gray-500 font-semibold mb-4">Digite o número do WhatsApp desta loja para gerar um código de 8 dígitos.</p>
+                                        <div class="flex gap-2 mb-3">
+                                            <input type="tel" id="pairingPhoneInput"
+                                                class="input-field flex-1"
+                                                placeholder="5511999999999"
+                                                maxlength="15"
+                                                oninput="this.value=this.value.replace(/\D/g,'')">
+                                            <button onclick="requestPairingCode()" id="pairingBtn"
+                                                class="btn btn-primary px-5 py-2 text-sm whitespace-nowrap">
+                                                Gerar código
+                                            </button>
+                                        </div>
+                                        <p class="text-xs text-gray-400 font-semibold">Formato internacional sem + ou espaços. Ex: <strong>5511999999999</strong></p>
+                                        <p id="pairingMsg" class="text-sm font-bold mt-3 hidden"></p>
+                                    </div>
+
+                                    <!-- Código gerado -->
+                                    <div id="pairingCodeBox" class="hidden">
+                                        <div class="bg-gray-950 rounded-2xl p-6 text-center">
+                                            <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Código de pareamento</p>
+                                            <div id="pairingCodeDisplay" class="text-5xl font-black text-white tracking-widest font-mono mb-3">----</div>
+                                            <div id="pairingCodeTimer" class="text-sm text-gray-400 font-bold"></div>
+                                        </div>
+                                        <ol class="mt-4 space-y-2 text-sm font-bold text-gray-700">
+                                            <li class="flex gap-2"><span class="text-blue-600">1.</span><span>Abra o WhatsApp no celular da loja.</span></li>
+                                            <li class="flex gap-2"><span class="text-blue-600">2.</span><span>Toque em <strong>Aparelhos conectados → Conectar aparelho</strong>.</span></li>
+                                            <li class="flex gap-2"><span class="text-blue-600">3.</span><span>Toque em <strong>Vincular com número de telefone</strong>.</span></li>
+                                            <li class="flex gap-2"><span class="text-blue-600">4.</span><span>Digite o código acima e aguarde a conexão.</span></li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel p-6">
+                        <h3 class="text-xl font-black text-gray-950 mb-4">Saúde do canal</h3>
+                        <div class="space-y-3">
+                            <div class="soft-panel p-4 flex items-center justify-between">
+                                <span class="font-bold text-gray-600">Status</span>
+                                <span id="botHealthStatus" class="font-black text-gray-950">-</span>
+                            </div>
+                            <div class="soft-panel p-4 flex items-center justify-between">
+                                <span class="font-bold text-gray-600">Número</span>
+                                <span id="botPhoneStatus" class="font-black text-gray-950">-</span>
+                            </div>
+                            <div class="soft-panel p-4 flex items-center justify-between">
+                                <span class="font-bold text-gray-600">Atendimento</span>
+                                <span id="botEnabledStatus" class="font-black text-gray-950">-</span>
+                            </div>
+                            <div class="soft-panel p-4 flex items-center justify-between">
+                                <span class="font-bold text-gray-600">Pendencias</span>
+                                <span id="botPendingStatus" class="font-black text-gray-950">-</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t">
+                            <div class="soft-panel p-4 border border-amber-200 bg-amber-50">
+                                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                                    <div>
+                                        <h4 class="font-black text-gray-950">Manutenção segura</h4>
+                                        <p class="text-xs text-gray-600 font-semibold mt-1">Limpa somente cache temporário, notificações visuais desta sessão e pendências do bot pausado. Não apaga clientes, agenda, usuários, senhas, empresas, planilhas ou sessão do WhatsApp.</p>
+                                        <div id="safeCleanupStatus" class="text-xs text-gray-500 font-bold mt-2">Pronto para executar quando necessário.</div>
+                                    </div>
+                                    <button type="button" onclick="runSafeCleanup()" id="safeCleanupBtn" class="btn btn-light px-4 py-3 text-sm">
+                                        <i class="fas fa-broom"></i> Limpeza segura
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Seção Diagnóstico -->
+            <section id="view-diagnostico" class="view">
+                <div class="page-section">
+                    <div class="section-header flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div>
+                            <h3 class="text-2xl font-black text-gray-950">Diagnóstico operacional</h3>
+                            <p class="text-sm text-gray-500 font-semibold mt-1">Prontidão da loja, assinatura, WhatsApp, módulos e pontos de atenção.</p>
+                        </div>
+                        <button onclick="loadDiagnostics(true)" class="btn btn-light px-4 py-2 text-sm"><i class="fas fa-rotate"></i>Atualizar</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-4 gap-4 mt-5">
+                        <div class="kpi-card p-4">
+                            <p class="text-xs font-black text-gray-400 uppercase">Saúde</p>
+                            <strong id="diagScore" class="text-3xl font-black text-gray-950 mt-1 block">--</strong>
+                            <span id="diagStatus" class="text-xs font-bold text-gray-500">Carregando</span>
+                        </div>
+                        <div class="kpi-card p-4">
+                            <p class="text-xs font-black text-gray-400 uppercase">Assinatura</p>
+                            <strong id="diagBilling" class="text-lg font-black text-gray-950 mt-1 block">--</strong>
+                            <span id="diagBillingSub" class="text-xs font-bold text-gray-500">Validade</span>
+                        </div>
+                        <div class="kpi-card p-4">
+                            <p class="text-xs font-black text-gray-400 uppercase">WhatsApp</p>
+                            <strong id="diagWhatsapp" class="text-lg font-black text-gray-950 mt-1 block">--</strong>
+                            <span id="diagWhatsappSub" class="text-xs font-bold text-gray-500">Conexão</span>
+                        </div>
+                        <div class="kpi-card p-4">
+                            <p class="text-xs font-black text-gray-400 uppercase">Atividade</p>
+                            <strong id="diagActivity" class="text-lg font-black text-gray-950 mt-1 block">--</strong>
+                            <span id="diagActivitySub" class="text-xs font-bold text-gray-500">Últimos 30 dias</span>
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-[1.15fr_.85fr] gap-5 mt-5">
+                        <div class="soft-panel p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-black text-gray-950">Checklist de implantação</h4>
+                                <span id="diagChecklistCount" class="text-xs font-black text-gray-400 uppercase">--</span>
+                            </div>
+                            <div id="diagChecklist" class="grid gap-2"></div>
+                        </div>
+                        <div class="soft-panel p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-black text-gray-950">Módulos da loja</h4>
+                                <span id="diagModuleCount" class="text-xs font-black text-gray-400 uppercase">--</span>
+                            </div>
+                            <div id="diagModules" class="grid gap-2"></div>
+                        </div>
+                    </div>
+
+                    <div class="soft-panel p-5 mt-5">
+                        <h4 class="font-black text-gray-950 mb-4">Contadores operacionais</h4>
+                        <div id="diagCounts" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção Automações -->
+            <section id="view-automacoes" class="view">
+                <div class="panel p-5 mb-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <h3 class="font-black text-gray-950">Automações do WhatsApp</h3>
+                        <p class="text-sm text-gray-500 font-semibold">Templates persistidos no backend e usados pelo bot em tempo real.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input id="flowTestPhone" class="input-field text-sm" placeholder="Telefone teste: 5511999999999" value="5511999999999">
+                        <button type="button" onclick="testAutomation('Msg_Welcome')" class="btn btn-primary px-4 py-2 text-sm">
+                            <i class="fas fa-vial"></i> Testar menu
+                        </button>
+                    </div>
+                </div>
+                <!-- Barra de controle em tempo real do atendimento automático -->
+                <div class="panel p-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" id="autoControlBar">
+                    <div class="flex items-center gap-3">
+                        <span id="autoBotDot" class="w-3 h-3 rounded-full bg-gray-300 flex-shrink-0"></span>
+                        <div>
+                            <div class="font-black text-gray-950 text-sm" id="autoBotStatusText">Verificando atendimento…</div>
+                            <div class="text-xs text-gray-500 font-semibold" id="autoBotSubText">Conexão do WhatsApp e estado do bot</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="autoBotPending" class="text-xs font-bold text-gray-400 hidden"></span>
+                        <button type="button" id="autoBotToggleBtn" onclick="toggleBotFromAutomations()" class="btn btn-light px-4 py-2 text-sm" disabled>
+                            <i class="fas fa-circle-notch fa-spin"></i> Carregando
+                        </button>
+                        <button type="button" onclick="loadAutomationStatus()" class="btn btn-light px-3 py-2 text-sm" title="Atualizar status agora">
+                            <i class="fas fa-rotate"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="automationGrid">
+                    <!-- Cards de Automação gerados via JS -->
+                </div>
+                <div id="flowTestResult" class="mt-6 hidden panel p-4 text-sm font-semibold"></div>
+
+                <div class="mt-8 panel p-6 bg-blue-50 border-blue-100">
+                    <h4 class="font-black text-blue-900 mb-2"><i class="fas fa-circle-info"></i> Variáveis disponíveis</h4>
+                    <p class="text-xs text-blue-700/80 font-semibold mb-3">Clique para inserir no campo de mensagem selecionado.</p>
+                    <div class="flex flex-wrap gap-2" id="automationVariables">
+                        <!-- Chips de variáveis gerados via JS conforme o tipo da loja -->
+                    </div>
+                </div>
+            </section>
+
+          
+
+
+            <!-- Seção Relatórios -->
+            <section id="view-relatorios" class="view">
+                <div class="reports-shell space-y-6">
+                <div class="panel reports-filter-panel p-5 mb-6">
+                    <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-950">Centro de análise operacional</h3>
+                            <p class="text-sm text-gray-500 font-semibold mt-1">Filtros persistentes para acompanhar faturamento, agenda, profissionais e histórico.</p>
+                        </div>
+                        <div class="reports-filters grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
+                            <select id="reportPeriod" class="input-field text-sm font-bold" onchange="applyReportPreset()">
+                                <option value="week">Semana atual</option>
+                                <option value="last7">Últimos 7 dias</option>
+                                <option value="month">Mês atual</option>
+                                <option value="last30">Últimos 30 dias</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+                            <input id="reportFrom" type="date" class="input-field text-sm font-bold" onchange="persistReportFilters()">
+                            <input id="reportTo" type="date" class="input-field text-sm font-bold" onchange="persistReportFilters()">
+                            <select id="reportBarber" class="input-field text-sm font-bold" onchange="loadReports()">
+                                <option value="">Todos os profissionais</option>
+                            </select>
+                            <select id="reportService" class="input-field text-sm font-bold" onchange="loadReports()">
+                                <option value="">Todos os serviços</option>
+                            </select>
+                            <select id="reportStatus" class="input-field text-sm font-bold" onchange="loadReports()">
+                                <option value="">Todos os status</option>
+                                <option value="confirmed">Concluídos</option>
+                                <option value="pending">Pendentes</option>
+                            </select>
+                            <button onclick="loadReports()" class="btn btn-primary px-4 py-2 text-sm">
+                                <i class="fas fa-filter"></i> Aplicar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-200">
+                        <div id="reportStatusText" class="text-xs font-bold text-gray-500">Pronto para carregar relatórios.</div>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="inline-flex items-center gap-2 text-xs font-bold text-gray-600 px-3 py-2 soft-panel">
+                                <input id="reportAutoRefresh" type="checkbox" onchange="toggleReportAutoRefresh()"> Atualização automática
+                            </label>
+                            <button onclick="exportReportsCsv()" class="btn btn-light px-4 py-2 text-sm">
+                                <i class="fas fa-file-csv"></i> CSV filtrado
+                            </button>
+                            <button onclick="exportExcel()" class="btn btn-light px-4 py-2 text-sm">
+                                <i class="fas fa-file-excel"></i> Excel
+                            </button>
+                            <button onclick="syncGoogleSheets()" class="btn btn-light px-4 py-2 text-sm">
+                                <i class="fas fa-table"></i> Google Sheets
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <!-- KPI Cards Modernos -->
+                    <div class="panel p-6">
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium text-slate-500">Receita Estimada</p>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">+12.5%</span>
+                        </div>
+                        <h3 id="statMonthRevenue" class="text-2xl font-bold mt-2 tabular-nums">R$ 0,00</h3>
+                        <p class="text-xs text-slate-400 mt-4">vs. mês anterior</p>
+                    </div>
+                    <div class="panel p-6">
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium text-slate-500">Agendamentos</p>
+                            <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded">Estável</span>
+                        </div>
+                        <h3 id="statMonthTotal" class="text-2xl font-bold mt-2">0</h3>
+                        <p class="text-xs text-slate-400 mt-4">Total no período</p>
+                    </div>
+                    <div class="panel p-6">
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium text-slate-500">Taxa de Presença</p>
+                            <span class="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-1 rounded">-2%</span>
+                        </div>
+                        <h3 id="statAttendanceRate" class="text-2xl font-bold mt-2">0%</h3>
+                        <p class="text-xs text-slate-400 mt-4">Lealdade dos clientes</p>
+                    </div>
+                    <div class="panel p-6">
+                        <div class="flex justify-between items-start">
+                            <p class="text-sm font-medium text-slate-500">Novos Clientes</p>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Novo!</span>
+                        </div>
+                        <h3 id="statNewClients" class="text-2xl font-bold mt-2">--</h3>
+                        <p class="text-xs text-slate-400 mt-4">Captação via WhatsApp</p>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 panel p-6">
+                        <div class="flex items-center justify-between mb-8">
+                            <div>
+                                <h4 class="text-lg font-bold">Fluxo de Agendamentos</h4>
+                                <p class="text-sm text-slate-500">Volume de conversas vs. horários marcados</p>
+                            </div>
+                            <select class="text-xs font-bold border-none bg-slate-100 rounded-md p-2 outline-none">
+                                <option>Últimos 7 dias</option>
+                                <option>Últimos 30 dias</option>
+                            </select>
+                        </div>
+
+                        <!-- Gráfico de Tendências Real -->
+                        <div class="h-64 w-full">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="panel p-6">
+                        <h4 class="text-lg font-bold mb-6">Serviços Populares</h4>
+                        <div id="popularServicesList" class="space-y-3">
+                            <p class="text-center text-gray-400 py-4 font-bold">Carregando dados...</p>
+                        </div>
+                        
+                        <div class="mt-8 pt-6 border-t border-gray-100">
+                            <h4 class="text-sm font-black text-gray-400 uppercase mb-4">Status do Sistema</h4>
+                            <div class="space-y-2 text-sm font-bold text-gray-600">
+                                <div class="flex justify-between"><span>Uptime:</span> <span id="statUptime" class="text-gray-950">-</span></div>
+                                <div class="flex justify-between"><span>Memória:</span> <span id="statMemory" class="text-gray-950">-</span></div>
+                                <div class="flex justify-between"><span>Sessões:</span> <span id="statSessions" class="text-gray-950">-</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reports-kpi-grid grid grid-cols-2 xl:grid-cols-4 2xl:grid-cols-8 gap-4">
+                    <div class="panel report-kpi p-5"><span>Concluídos</span><strong id="reportCompleted">0</strong><small>Atendidos</small></div>
+                    <div class="panel report-kpi p-5"><span>Cancelados</span><strong id="reportCanceled">0</strong><small>Removidos/ausentes</small></div>
+                    <div class="panel report-kpi p-5"><span>Receita realizada</span><strong id="reportRealizedRevenue">R$ 0,00</strong><small>Concluídos</small></div>
+                    <div class="panel report-kpi p-5"><span>Recorrentes</span><strong id="reportRecurringClients">0</strong><small>Clientes que voltaram</small></div>
+                    <div class="panel report-kpi p-5"><span>Média por dia</span><strong id="reportAvgPerDay">0</strong><small>Atendimentos</small></div>
+                    <div class="panel report-kpi p-5"><span>Tempo médio</span><strong id="reportAvgGap">0min</strong><small>Entre horários</small></div>
+                    <div class="panel report-kpi p-5"><span>Cancelamento</span><strong id="reportCancelRate">0%</strong><small>Taxa estimada</small></div>
+                    <div class="panel report-kpi p-5"><span>Mais ativo</span><strong id="reportTopBarber">-</strong><small>Profissional</small></div>
+                </div>
+
+                <div class="grid xl:grid-cols-4 gap-6">
+                    <div class="panel p-5">
+                        <h4 class="report-panel-title" data-biz="reportBarberTitle">Cortes por profissional</h4>
+                        <div class="report-chart"><canvas id="barberReportChart"></canvas></div>
+                    </div>
+                    <div class="panel p-5">
+                        <h4 class="report-panel-title">Horários movimentados</h4>
+                        <div class="report-chart"><canvas id="busyHoursChart"></canvas></div>
+                    </div>
+                    <div class="panel p-5">
+                        <h4 class="report-panel-title">Novos x recorrentes</h4>
+                        <div class="report-chart"><canvas id="clientsReportChart"></canvas></div>
+                    </div>
+                    <div class="panel p-5">
+                        <h4 class="report-panel-title">Dias da semana</h4>
+                        <div class="report-chart"><canvas id="weekdayReportChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="grid xl:grid-cols-2 gap-6">
+                    <div class="panel p-5">
+                        <h4 class="report-panel-title">Comparativo semanal</h4>
+                        <div class="report-chart"><canvas id="weekCompareChart"></canvas></div>
+                    </div>
+                    <div class="panel p-5">
+                        <h4 class="report-panel-title">Serviços por faturamento</h4>
+                        <div class="report-chart"><canvas id="servicesReportChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="panel p-0 overflow-hidden">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-5 border-b border-slate-200">
+                        <div>
+                            <h4 class="text-lg font-black text-gray-950">Relatório semanal em tabela</h4>
+                            <p class="text-sm text-slate-500 font-semibold">Cliente, profissional, serviço, horário, status, valor e origem do agendamento.</p>
+                        </div>
+                        <span id="reportTableCount" class="report-chip">0 registros</span>
+                    </div>
+                    <div class="report-table-scroll">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Cliente</th>
+                                    <th>Profissional</th>
+                                    <th>Serviço</th>
+                                    <th>Horário</th>
+                                    <th>Status</th>
+                                    <th>Valor</th>
+                                    <th>Forma</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weeklyReportTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="reportEmptyState" class="hidden p-8 text-center text-sm font-bold text-gray-500">
+                        Nenhum dado encontrado para os filtros selecionados.
+                    </div>
+                </div>
+                </div>
+            </section>
+            <section id="view-configuracoes" class="view">
+                <div class="panel p-6 max-w-4xl">
+                    <h3 class="text-2xl font-black text-gray-950 mb-6">Configurações do Estabelecimento</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Horário de Abertura</label>
+                                <input id="setOpening" type="time" class="input-field">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Horário de Fechamento</label>
+                                <input id="setClosing" type="time" class="input-field">
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t">
+                            <label class="block text-sm font-bold text-gray-700 mb-4">Limites Diários por Serviço (0 = Ilimitado)</label>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div>
+                                    <span class="text-xs font-bold text-gray-500" data-biz="limitLabel1">Corte</span>
+                                    <input id="limit_1" type="number" min="0" class="input-field py-1" placeholder="Ex: 10">
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-gray-500" data-biz="limitLabel2">Barba</span>
+                                    <input id="limit_2" type="number" min="0" class="input-field py-1">
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-gray-500" data-biz="limitLabel3">Sobrancelha</span>
+                                    <input id="limit_3" type="number" min="0" class="input-field py-1">
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-gray-500" data-biz="limitLabelCombos">Combos</span>
+                                    <input id="limit_combos" type="number" min="0" class="input-field py-1" placeholder="Geral">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t">
+                            <div class="flex items-start justify-between gap-3 mb-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700">Serviços, preços e duração</label>
+                                    <p class="text-xs text-gray-500 font-semibold mt-1">Esses valores alimentam dashboard, API e chatbot automaticamente.</p>
+                                </div>
+                            </div>
+                            <div id="servicesConfigGrid" class="space-y-3">
+                                <div class="grid grid-cols-[1.4fr_90px_90px_80px] gap-2 text-[11px] font-black uppercase tracking-wide text-gray-500">
+                                    <span>Nome</span><span>Preço</span><span>Min</span><span>Ativo</span>
+                                </div>
+                                <div class="grid grid-cols-[1.4fr_90px_90px_80px] gap-2">
+                                    <input id="serviceName_1" type="text" class="input-field py-1" placeholder="Corte">
+                                    <input id="price_1" type="number" min="0" step="0.01" class="input-field py-1">
+                                    <input id="duration_1" type="number" min="5" step="5" class="input-field py-1">
+                                    <label class="flex items-center justify-center"><input id="active_1" type="checkbox" checked></label>
+                                </div>
+                                <div class="grid grid-cols-[1.4fr_90px_90px_80px] gap-2">
+                                    <input id="serviceName_2" type="text" class="input-field py-1" placeholder="Barba">
+                                    <input id="price_2" type="number" min="0" step="0.01" class="input-field py-1">
+                                    <input id="duration_2" type="number" min="5" step="5" class="input-field py-1">
+                                    <label class="flex items-center justify-center"><input id="active_2" type="checkbox" checked></label>
+                                </div>
+                                <div class="grid grid-cols-[1.4fr_90px_90px_80px] gap-2">
+                                    <input id="serviceName_3" type="text" class="input-field py-1" placeholder="Sobrancelha">
+                                    <input id="price_3" type="number" min="0" step="0.01" class="input-field py-1">
+                                    <input id="duration_3" type="number" min="5" step="5" class="input-field py-1">
+                                    <label class="flex items-center justify-center"><input id="active_3" type="checkbox" checked></label>
+                                </div>
+                                <div class="grid grid-cols-[1.4fr_90px_90px_80px] gap-2">
+                                    <input id="serviceName_4" type="text" class="input-field py-1" placeholder="Corte + Barba">
+                                    <input id="price_4" type="number" min="0" step="0.01" class="input-field py-1">
+                                    <input id="duration_4" type="number" min="5" step="5" class="input-field py-1">
+                                    <label class="flex items-center justify-center"><input id="active_4" type="checkbox" checked></label>
+                                </div>
+                                <div class="grid grid-cols-[1.4fr_90px_90px_80px] gap-2">
+                                    <input id="serviceName_5" type="text" class="input-field py-1" placeholder="Corte + Sobrancelha">
+                                    <input id="price_5" type="number" min="0" step="0.01" class="input-field py-1">
+                                    <input id="duration_5" type="number" min="5" step="5" class="input-field py-1">
+                                    <label class="flex items-center justify-center"><input id="active_5" type="checkbox" checked></label>
+                                </div>
+                                <div class="grid grid-cols-[1.4fr_90px_90px_80px] gap-2">
+                                    <input id="serviceName_6" type="text" class="input-field py-1" placeholder="Completo">
+                                    <input id="price_6" type="number" min="0" step="0.01" class="input-field py-1">
+                                    <input id="duration_6" type="number" min="5" step="5" class="input-field py-1">
+                                    <label class="flex items-center justify-center"><input id="active_6" type="checkbox" checked></label>
+                                </div>
+                            </div>
+                            <div class="mt-5 pt-4 border-t border-slate-200">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
+                                    <div>
+                                        <h4 class="text-sm font-black text-gray-800">Cadastro operacional de serviços</h4>
+                                        <p class="text-xs text-gray-500 font-semibold mt-1">Usa o catálogo real da loja, respeitando ativo/inativo, preço e duração.</p>
+                                    </div>
+                                    <button type="button" onclick="openServiceModal()" class="btn btn-blue px-4 py-2 text-sm">
+                                        <i class="fas fa-plus"></i> Novo serviço
+                                    </button>
+                                </div>
+                                <div id="servicesManagerList" class="grid md:grid-cols-2 gap-3">
+                                    <div class="col-span-full flex items-center gap-2 py-3 text-gray-400 text-sm font-semibold"><i class="fas fa-spinner fa-spin text-xs"></i> Carregando serviços...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t">
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Retenção de Clientes</label>
+                            <p class="text-xs text-gray-500 font-semibold mb-3">Define em quantos dias sem retorno o sistema pode enviar mensagem automática.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-4">
+                                <input id="retentionDays" type="number" min="7" max="90" class="input-field" placeholder="15">
+                                <input id="retentionMessage" type="text" class="input-field" placeholder="Olá, {nome}! Sentimos sua falta na {loja}...">
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t">
+                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-3">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700">Google Sheets</label>
+                                    <p class="text-xs text-gray-500 font-semibold mt-1">Cole aqui a URL do Apps Script para sincronizar Agendamentos, Clientes, Financeiro, Profissionais e Logs.</p>
+                                </div>
+                                <button type="button" onclick="syncGoogleSheets()" class="btn btn-light px-4 py-2 text-sm">
+                                    <i class="fas fa-table"></i> Testar
+                                </button>
+                            </div>
+                            <input id="googleSheetsWebhook" type="url" class="input-field font-mono text-xs" placeholder="https://script.google.com/macros/s/.../exec">
+                        </div>
+
+                        <div class="pt-4 border-t">
+                            <button onclick="saveGeneralSettings()" class="btn btn-primary px-8 py-3">
+                                <i class="fas fa-save"></i> Salvar Alterações
+                            </button>
+                        </div>
+
+                        <!-- ── Instalar aplicativo (PWA) ──────────────────────────── -->
+                        <div class="pt-4 border-t" id="pwaInstallSection">
+                            <div class="flex items-start gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0 border border-indigo-100">
+                                    <i class="fas fa-mobile-screen-button text-indigo-600 text-base"></i>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700">Instalar aplicativo</label>
+                                    <p class="text-xs text-gray-500 font-semibold mt-0.5">Acesse a dashboard como app nativo — abre direto da tela inicial, sem navegador.</p>
+                                </div>
+                            </div>
+
+                            <!-- Status: já rodando como PWA instalada -->
+                            <div id="pwaAlreadyInstalled" class="hidden flex items-center gap-3 p-4 rounded-xl bg-green-50 border border-green-200 mb-4">
+                                <i class="fas fa-circle-check text-green-600 text-lg flex-shrink-0"></i>
+                                <div>
+                                    <p class="text-sm font-black text-green-800">Aplicativo instalado</p>
+                                    <p class="text-xs text-green-700 font-semibold mt-0.5">Você já está usando a dashboard em modo standalone.</p>
+                                </div>
+                            </div>
+
+                            <!-- Android / Chrome: botão de instalar nativo -->
+                            <div id="pwaAndroidInstall" class="hidden">
+                                <button onclick="installPwaApp()" class="btn btn-primary w-full py-3 text-sm flex items-center justify-center gap-2 mb-3">
+                                    <i class="fas fa-download"></i> Instalar no dispositivo
+                                </button>
+                                <p class="text-xs text-gray-400 font-semibold text-center">Funciona no Chrome, Edge e Samsung Internet.</p>
+                            </div>
+
+                            <!-- iOS / Safari: instruções passo a passo -->
+                            <div id="pwaIosInstall" class="hidden">
+                                <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 mb-3">
+                                    <p class="text-sm font-black text-blue-900 mb-3 flex items-center gap-2">
+                                        <i class="fab fa-apple text-base"></i>
+                                        Instalar no iPhone / iPad
+                                    </p>
+                                    <p class="text-xs text-blue-700 font-semibold mb-3">Abra esta página no <strong>Safari</strong> e siga os passos:</p>
+                                    <ol class="space-y-2.5">
+                                        <li class="flex items-start gap-2.5 text-sm text-blue-800">
+                                            <span class="w-5 h-5 rounded-full bg-blue-200 text-blue-800 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+                                            <span>Toque no ícone <strong>Compartilhar</strong> <i class="fas fa-arrow-up-from-bracket text-xs mx-0.5"></i> na barra inferior do Safari</span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5 text-sm text-blue-800">
+                                            <span class="w-5 h-5 rounded-full bg-blue-200 text-blue-800 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5">2</span>
+                                            <span>Role a lista e toque em <strong>"Adicionar à Tela de Início"</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5 text-sm text-blue-800">
+                                            <span class="w-5 h-5 rounded-full bg-blue-200 text-blue-800 font-black text-xs flex items-center justify-center flex-shrink-0 mt-0.5">3</span>
+                                            <span>Toque em <strong>Adicionar</strong> no canto superior direito</span>
+                                        </li>
+                                    </ol>
+                                </div>
+                                <p id="pwaIosNotSafari" class="hidden text-xs text-amber-700 font-semibold bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                    <i class="fas fa-triangle-exclamation mr-1"></i>
+                                    Você está usando um navegador diferente do Safari. Para instalar no iPhone, abra este site no <strong>Safari</strong>.
+                                </p>
+                            </div>
+
+                            <!-- Genérico: informação sobre PWA para outros browsers -->
+                            <div id="pwaGenericInfo" class="hidden">
+                                <p class="text-xs text-gray-500 font-semibold p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <i class="fas fa-info-circle mr-1 text-gray-400"></i>
+                                    Para instalar, use o Chrome (Android) ou Safari (iPhone/iPad) e acesse a opção de instalação do menu do navegador.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t">
+                            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3 mb-4">
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700">Inventário de dependências</label>
+                                    <p class="text-xs text-gray-500 font-semibold mt-1">Mapa operacional das peças que precisam estar saudáveis para agenda, bot, gráficos e notificações.</p>
+                                </div>
+                                <span class="dependency-status">Atualizado</span>
+                            </div>
+                            <div class="dependency-grid">
+                                <div class="dependency-item">
+                                    <span>Frontend dashboard</span>
+                                    <strong>Chart.js CDN, Tailwind CDN, Font Awesome CDN, SignalR JS, Service Worker</strong>
+                                </div>
+                                <div class="dependency-item">
+                                    <span>API Node</span>
+                                    <strong>Express, Helmet, CORS, Morgan, bcryptjs, node-fetch, rate-limit</strong>
+                                </div>
+                                <div class="dependency-item">
+                                    <span>Backend .NET</span>
+                                    <strong>.NET 8, EF Core SQLite, ASP.NET Core SignalR, JWT, Memory Cache</strong>
+                                </div>
+                                <div class="dependency-item">
+                                    <span>WhatsApp Bridge</span>
+                                    <strong>whatsapp-web.js, Puppeteer, QRCode, Express, CORS, Helmet</strong>
+                                </div>
+                                <div class="dependency-item">
+                                    <span>Dados e relatórios</span>
+                                    <strong>SQLite, ClosedXML, Google Sheets webhook, CSV export</strong>
+                                </div>
+                                <div class="dependency-item">
+                                    <span>Operação</span>
+                                    <strong>SignalR LongPolling, som de alerta, browser notifications, Polly, Serilog</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Seção Calendário -->
+            <section id="view-calendario" class="view">
+                <!-- Controles: tudo em uma linha, legenda inline no final -->
+                <div class="panel p-2 mb-2">
+                    <div class="flex items-center gap-2 flex-nowrap min-w-0">
+                        <!-- Alternância Semana/Mês -->
+                        <div class="flex rounded-lg overflow-hidden border border-slate-200 flex-shrink-0">
+                            <button id="calBtnWeek"
+                                class="btn btn-primary text-xs px-3 py-1.5 rounded-none flex items-center gap-1"
+                                onclick="setCalView('week')">
+                                <i class="fas fa-calendar-week"></i>
+                                <span class="hidden sm:inline">Sem</span>
+                            </button>
+                            <button id="calBtnMonth"
+                                class="btn btn-light text-xs px-3 py-1.5 rounded-none border-l border-slate-200 flex items-center gap-1"
+                                onclick="setCalView('month')">
+                                <i class="fas fa-calendar"></i>
+                                <span class="hidden sm:inline">Mês</span>
+                            </button>
+                        </div>
+                        <!-- Navegação -->
+                        <div class="flex items-center gap-1 flex-1 min-w-0">
+                            <button class="btn btn-light px-2 py-1.5 text-xs flex-shrink-0" onclick="calNav(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span id="calRangeLabel"
+                                class="text-xs font-black text-gray-800 text-center flex-1 min-w-0 truncate px-1">...</span>
+                            <button class="btn btn-light px-2 py-1.5 text-xs flex-shrink-0" onclick="calNav(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <!-- Hoje -->
+                        <button class="btn btn-light text-xs px-3 py-1.5 flex-shrink-0" onclick="calToday()">Hoje</button>
+                        <!-- Filtro (sm+) -->
+                        <select id="calBarberFilter"
+                            class="input-field text-xs py-1.5 w-36 hidden sm:block flex-shrink-0"
+                            onchange="renderCalendar()">
+                            <option value="">Todos os profissionais</option>
+                        </select>
+                        <!-- Legenda inline (xl+): sem linha extra, sem borda -->
+                        <div id="calLegendaInline" class="hidden xl:flex items-center gap-2 ml-auto pl-2 border-l border-slate-100 text-[11px] font-bold text-gray-400 flex-shrink-0">
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:#dc2626"></span>Corte</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:#d9901a"></span>Barba</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:#2563eb"></span>Sob.</span>
+                            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm" style="background:#4f46e5"></span>Combos</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Week view -->
+                <div id="calWeekView" class="panel p-0 overflow-hidden"></div>
+                <!-- Month view -->
+                <div id="calMonthView" class="panel p-0 overflow-hidden hidden"></div>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- VIEW: CLUBE VIP / ASSINATURAS                                  -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <section id="view-assinaturas" class="view">
+
+                <!-- ── Row 1: KPI cards — mesma estrutura visual da Agenda ── -->
+                <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Membros ativos</p>
+                            <i class="fas fa-crown text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-3xl font-black text-gray-950 mt-1 leading-none" id="subCountAtivos">–</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5" id="subActiveBadge">assinaturas</p>
+                    </div>
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Aguardando</p>
+                            <i class="fas fa-clock text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-3xl font-black text-gray-950 mt-1 leading-none" id="subCountPendentes">–</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5">pagamento pendente</p>
+                    </div>
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Receita mês</p>
+                            <i class="fas fa-circle-dollar-to-slot text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-2xl font-black text-gray-950 mt-1 leading-none" id="subReceitaMes">R$ –</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5">cobranças ativadas</p>
+                    </div>
+                    <div class="panel p-5 soft-panel metric-card">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 font-bold uppercase tracking-wide">Planos</p>
+                            <i class="fas fa-layer-group text-sm metric-icon-inline"></i>
+                        </div>
+                        <div class="text-3xl font-black text-gray-950 mt-1 leading-none" id="subCountPlanos">–</div>
+                        <p class="text-xs text-gray-400 font-semibold mt-1.5">disponíveis no bot</p>
+                    </div>
+                </div>
+
+                <!-- ── Row 2: conteúdo principal + sidebar ── -->
+                <div class="vip-layout-grid">
+
+                    <!-- ── Coluna principal: abas Membros / Planos ── -->
+                    <div class="panel p-0 overflow-hidden min-w-0">
+                        <div class="flex items-center justify-between border-b border-gray-100">
+                            <div class="flex">
+                                <button id="subTabAssinantes"
+                                    class="px-5 py-3 text-sm font-black border-b-2 border-gray-950 text-gray-950 flex items-center gap-2"
+                                    onclick="showSubTab('assinantes')">
+                                    <i class="fas fa-users text-xs opacity-70"></i>
+                                    <span>Membros</span>
+                                </button>
+                                <button id="subTabPlanos"
+                                    class="px-5 py-3 text-sm font-bold text-gray-400 flex items-center gap-2"
+                                    onclick="showSubTab('planos')">
+                                    <i class="fas fa-layer-group text-xs opacity-70"></i>
+                                    <span>Planos</span>
+                                </button>
+                            </div>
+                            <!-- Ações rápidas no header da aba -->
+                            <div class="flex gap-2 pr-4">
+                                <button class="btn btn-light text-xs px-2.5 py-1.5" onclick="loadSubscriptions()" title="Atualizar lista">
+                                    <i class="fas fa-rotate"></i>
+                                </button>
+                                <button class="btn btn-red text-xs px-2.5 py-1.5" onclick="deleteCancelledSubscriptions()" title="Apagar canceladas">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Painel Membros -->
+                        <div id="subPanelAssinantes" class="p-4 md:p-5">
+                            <div class="flex items-center gap-2 mb-4 flex-wrap">
+                                <select id="subStatusFilter" class="input-field text-sm py-1.5 w-40" onchange="loadSubscriptions()">
+                                    <option value="">Todos os status</option>
+                                    <option value="Active">Ativos</option>
+                                    <option value="Pending">Pendentes</option>
+                                    <option value="Expired">Expirados</option>
+                                    <option value="Cancelled">Cancelados</option>
+                                </select>
+                                <div class="relative flex-1 min-w-36">
+                                    <i class="fas fa-search absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                                    <input type="text" id="subSearchInput" class="input-field text-sm py-1.5 pl-7 w-full"
+                                        placeholder="Buscar membro..." oninput="filterSubscriptionTable()">
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm" id="subTable">
+                                    <thead>
+                                        <tr class="text-xs text-gray-400 font-bold border-b border-gray-100 uppercase tracking-wide">
+                                            <th class="text-left pb-3 pr-3">Membro</th>
+                                            <th class="text-left pb-3 pr-3 hidden sm:table-cell">Telefone</th>
+                                            <th class="text-left pb-3 pr-3 sub-col-plan">Plano</th>
+                                            <th class="text-left pb-3 pr-3 hidden md:table-cell" data-biz="profissionalSingular">Profissional</th>
+                                            <th class="text-center pb-3 pr-3">Créditos</th>
+                                            <th class="text-left pb-3 pr-3 hidden md:table-cell">Validade</th>
+                                            <th class="text-left pb-3 pr-3 hidden xs:table-cell">Status</th>
+                                            <th class="text-left pb-3">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="subTableBody">
+                                        <tr><td colspan="8" class="py-10 text-center text-gray-400 font-semibold">Carregando membros...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Painel Planos -->
+                        <div id="subPanelPlanos" class="p-4 md:p-5 hidden">
+                            <div class="flex items-center justify-between mb-4">
+                                <p class="text-sm text-gray-500 font-semibold">Planos exibidos no bot para os clientes.</p>
+                                <button class="btn btn-primary text-sm px-4 py-2" onclick="openPlanModal()">
+                                    <i class="fas fa-plus"></i> Novo plano
+                                </button>
+                            </div>
+                            <div id="plansList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="text-center text-gray-400 py-10 col-span-2 font-semibold">Carregando planos...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Sidebar ── -->
+                    <div class="vip-sidebar space-y-4">
+
+                        <!-- Chave PIX -->
+                        <div class="panel p-5 vip-pix-panel">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-black text-gray-950 leading-tight">Chave PIX da loja</h3>
+                                    <p class="text-xs text-gray-500 font-semibold mt-0.5">Enviada ao cliente ao escolher um plano.</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-gray-500">Chave PIX</label>
+                                <input type="text" id="pixKeyInput" class="input-field w-full text-sm"
+                                    placeholder="CPF, e-mail, telefone ou aleatória">
+                            </div>
+                            <button class="btn btn-primary w-full py-2 text-sm mt-3" onclick="savePixKey()">
+                                <i class="fas fa-save"></i> Salvar chave
+                            </button>
+                            <p id="pixKeySaveMsg" class="text-xs mt-2 hidden"></p>
+                            <!-- Dica: PIX individual por barbeiro -->
+                            <div class="mt-3 rounded-lg bg-blue-50 border border-blue-100 px-3 py-2 flex items-start gap-2">
+                                <i class="fas fa-circle-info text-blue-400 text-xs mt-0.5 flex-shrink-0"></i>
+                                <p class="text-xs text-blue-700 font-semibold leading-snug">Cada <span data-biz="profissionalSingular">profissional</span> pode ter um PIX próprio — o cliente paga direto para quem vai atendê-lo. Configure em <button class="underline font-black" onclick="showView('agenda'); setTimeout(()=>document.getElementById('sectionBarbeiros')?.scrollIntoView({behavior:'smooth'}),300)">Funcionários → Editar</button>.</p>
+                            </div>
+                        </div>
+
+                        <!-- Resumo rápido dos planos -->
+                        <div class="panel p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-black text-gray-950">Planos do bot</h4>
+                                <button class="btn btn-light text-xs px-3 py-1.5" onclick="showSubTab('planos')" title="Gerenciar planos">
+                                    <i class="fas fa-pen-to-square mr-1"></i>Gerenciar
+                                </button>
+                            </div>
+                            <div id="vipSidebarPlans" class="space-y-2">
+                                <p class="text-xs text-gray-400 font-semibold py-2">Carregando...</p>
+                            </div>
+                            <button class="btn btn-light w-full text-xs py-2 mt-3 border-dashed" onclick="openPlanModal()">
+                                <i class="fas fa-plus mr-1"></i> Criar novo plano
+                            </button>
+                        </div>
+
+                    </div><!-- /sidebar -->
+                </div><!-- /vip-layout-grid -->
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal de Atendimento de Otimização -->
+    <div id="optimizationTicketModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="panel p-6 w-full max-w-4xl max-h-[92vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-3 mb-5">
+                <div>
+                    <h2 id="optimizationTicketModalTitle" class="text-2xl font-black text-gray-950">Novo atendimento</h2>
+                    <p class="text-sm text-gray-500 font-semibold mt-1">Triagem rápida para uma sessão remota segura e objetiva.</p>
+                </div>
+                <button onclick="closeOptimizationTicketModal()" class="btn btn-light px-3 py-2"><i class="fas fa-xmark"></i></button>
+            </div>
+            <input id="optimizationTicketId" type="hidden">
+            <div class="grid lg:grid-cols-2 gap-4">
+                <div class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <input id="optimizationCustomerName" class="input-field" placeholder="Nome do cliente">
+                        <input id="optimizationPhone" class="input-field" placeholder="WhatsApp">
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <select id="optimizationService" class="input-field"></select>
+                        <select id="optimizationMode" class="input-field" aria-label="Modalidade do atendimento">
+                            <option value="Remoto">100% remoto</option>
+                        </select>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <select id="optimizationGoal" class="input-field">
+                            <option>Otimização geral do computador</option>
+                            <option>Melhorar FPS</option>
+                            <option>Deixar Windows mais rápido</option>
+                            <option>Limpar sistema</option>
+                            <option>Formatar</option>
+                            <option>Configurar jogos</option>
+                            <option>Configurar PC novo</option>
+                            <option>Outro</option>
+                        </select>
+                        <select id="optimizationUrgency" class="input-field">
+                            <option>Hoje</option>
+                            <option selected>Essa semana</option>
+                            <option>Sem pressa</option>
+                        </select>
+                    </div>
+                    <textarea id="optimizationProblem" class="input-field min-h-24" placeholder="O que está lento, travando ou precisa melhorar?"></textarea>
+                    <textarea id="optimizationBeforeNotes" class="input-field min-h-20" placeholder="Preparação da sessão remota, disponibilidade e observações. Nunca registre senhas."></textarea>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <input id="optimizationEstimated" type="number" min="0" step="0.01" class="input-field" placeholder="Valor estimado">
+                        <input id="optimizationFinal" type="number" min="0" step="0.01" class="input-field" placeholder="Valor final">
+                    </div>
+                    <div id="optimizationQuoteBox" class="soft-panel p-4 hidden">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="font-black text-gray-950">Orcamento</h4>
+                            <i class="fas fa-file-invoice-dollar text-gray-400"></i>
+                        </div>
+                        <div class="grid sm:grid-cols-3 gap-2">
+                            <button onclick="submitOptimizationQuote(null)" class="btn btn-light text-sm py-2"><i class="fas fa-paper-plane"></i> Enviar</button>
+                            <button onclick="submitOptimizationQuote(true)" class="btn btn-primary text-sm py-2"><i class="fas fa-check"></i> Aprovar</button>
+                            <button onclick="submitOptimizationQuote(false)" class="btn btn-light text-sm py-2"><i class="fas fa-ban"></i> Recusar</button>
+                        </div>
+                    </div>
+                    <textarea id="optimizationResult" class="input-field min-h-20" placeholder="Resultado final / orientações ao cliente"></textarea>
+                </div>
+                <div class="space-y-4">
+                    <div class="soft-panel p-4">
+                        <h4 class="font-black text-gray-950 mb-3">Dados do computador</h4>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <select id="optimizationDeviceType" class="input-field">
+                                <option>Desktop</option>
+                                <option>Notebook</option>
+                                <option>AllInOne</option>
+                                <option>Outro</option>
+                            </select>
+                            <select id="optimizationOs" class="input-field">
+                                <option>Windows 11</option>
+                                <option>Windows 10</option>
+                                <option>Outro</option>
+                            </select>
+                            <input id="optimizationProcessor" class="input-field" placeholder="Processador">
+                            <input id="optimizationGpu" class="input-field" placeholder="GPU">
+                            <input id="optimizationRam" type="number" min="1" max="1024" class="input-field" placeholder="RAM GB">
+                            <select id="optimizationStorage" class="input-field">
+                                <option>Não informado</option>
+                                <option>SSD</option>
+                                <option>HDD</option>
+                                <option>NVMe</option>
+                                <option>Misto</option>
+                            </select>
+                            <select id="optimizationMainUse" class="input-field md:col-span-2">
+                                <option>Jogos</option>
+                                <option>Trabalho</option>
+                                <option>Estudo</option>
+                                <option>Edição</option>
+                                <option selected>Uso geral</option>
+                            </select>
+                        </div>
+                        <textarea id="optimizationDeviceNotes" class="input-field min-h-20 mt-3" placeholder="Observações do computador. Nunca salve senhas."></textarea>
+                    </div>
+                    <div id="optimizationChecklistBox" class="soft-panel p-4 hidden">
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="font-black text-gray-950">Checklist de software</h4>
+                            <button onclick="saveOptimizationChecklist()" class="btn btn-light px-3 py-1.5 text-xs">Salvar checklist</button>
+                        </div>
+                        <div id="optimizationChecklistItems" class="space-y-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 pt-5 mt-5 border-t border-slate-200">
+                <button onclick="saveOptimizationTicket()" class="btn btn-primary flex-1 py-3"><i class="fas fa-save"></i> Salvar atendimento</button>
+                <button onclick="closeOptimizationTicketModal()" class="btn btn-light flex-1 py-3">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Computador -->
+    <div id="optimizationDeviceModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="panel p-6 w-full max-w-2xl">
+            <div class="flex items-start justify-between gap-3 mb-5">
+                <div>
+                    <h2 id="optimizationDeviceModalTitle" class="text-2xl font-black text-gray-950">Novo computador</h2>
+                    <p class="text-sm text-gray-500 font-semibold mt-1">Cadastro simples para histórico do cliente.</p>
+                </div>
+                <button onclick="closeOptimizationDeviceModal()" class="btn btn-light px-3 py-2"><i class="fas fa-xmark"></i></button>
+            </div>
+            <input id="optimizationDeviceId" type="hidden">
+            <div class="grid md:grid-cols-2 gap-3">
+                <input id="deviceCustomerName" class="input-field" placeholder="Nome do cliente">
+                <input id="devicePhone" class="input-field" placeholder="WhatsApp">
+                <select id="deviceType" class="input-field"><option>Desktop</option><option>Notebook</option><option>AllInOne</option><option>Outro</option></select>
+                <select id="deviceOs" class="input-field"><option>Windows 11</option><option>Windows 10</option><option>Outro</option></select>
+                <input id="deviceProcessor" class="input-field" placeholder="Processador">
+                <input id="deviceGpu" class="input-field" placeholder="GPU">
+                <input id="deviceRam" type="number" min="1" max="1024" class="input-field" placeholder="RAM GB">
+                <select id="deviceStorage" class="input-field"><option>Não informado</option><option>SSD</option><option>HDD</option><option>NVMe</option><option>Misto</option></select>
+                <select id="deviceMainUse" class="input-field md:col-span-2"><option>Jogos</option><option>Trabalho</option><option>Estudo</option><option>Edição</option><option selected>Uso geral</option></select>
+                <textarea id="deviceNotes" class="input-field md:col-span-2 min-h-24" placeholder="Observações. Não registre senhas."></textarea>
+            </div>
+            <div class="flex gap-3 pt-5 mt-5 border-t border-slate-200">
+                <button onclick="saveOptimizationDevice()" class="btn btn-primary flex-1 py-3"><i class="fas fa-save"></i> Salvar computador</button>
+                <button onclick="closeOptimizationDeviceModal()" class="btn btn-light flex-1 py-3">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Novo Agendamento -->
+    <div id="manualAppointmentModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-lg w-full max-w-2xl shadow-2xl animate-fade-in">
+            <div class="flex items-center justify-between gap-4 mb-5">
+                <h2 class="text-2xl font-black text-gray-950">Novo agendamento</h2>
+                <button onclick="closeManualAppointmentModal()" class="btn btn-light px-3 py-2"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4">
+                <!-- Essencial: serviço + horário (agendamento rápido) -->
+                <div>
+                    <label class="text-[11px] font-black text-gray-500 uppercase tracking-wide">Serviço</label>
+                    <select id="manualService" class="input-field w-full mt-1" onchange="updateManualAvailableSlots()"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[11px] font-black text-gray-500 uppercase tracking-wide">Data</label>
+                        <input id="manualDate" type="date" class="input-field w-full mt-1" onchange="updateManualAvailableSlots()">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-black text-gray-500 uppercase tracking-wide">Horário</label>
+                        <select id="manualTime" class="input-field w-full mt-1"></select>
+                    </div>
+                </div>
+                <p id="manualSlotsHint" class="text-xs text-slate-500 font-bold"></p>
+
+                <!-- Opcional: cliente/profissional. Agendamento funciona só com serviço + horário. -->
+                <button type="button" id="manualOptionalToggle" onclick="toggleManualOptional()" class="text-xs font-black text-blue-600 flex items-center gap-1.5 hover:text-blue-800">
+                    <i class="fas fa-chevron-right transition-transform" id="manualOptionalChevron"></i> Dados do cliente / profissional (opcional)
+                </button>
+                <div id="manualOptionalFields" class="hidden grid md:grid-cols-2 gap-4">
+                    <input id="manualClient" type="text" placeholder="Nome (padrão: Cliente presencial)" class="input-field">
+                    <input id="manualPhone" type="tel" placeholder="Telefone/WhatsApp (opcional)" class="input-field">
+                    <select id="manualBarber" class="input-field" onchange="updateManualAvailableSlots()"></select>
+                    <textarea id="manualNotes" class="input-field md:col-span-2 min-h-16" placeholder="Observações internas (ex.: veículo no lava-jato)"></textarea>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button onclick="saveManualAppointment()" class="btn btn-primary flex-1 py-3">Salvar agendamento</button>
+                <button onclick="closeManualAppointmentModal()" class="btn btn-light flex-1 py-3">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Serviço -->
+    <div id="serviceModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="panel p-6 w-full max-w-lg">
+            <div class="flex items-start justify-between gap-3 mb-5">
+                <div>
+                    <h2 id="serviceModalTitle" class="text-2xl font-black text-gray-950">Novo serviço</h2>
+                    <p class="text-sm text-gray-500 font-semibold mt-1">Aparece no agendamento manual e no bot da loja.</p>
+                </div>
+                <button onclick="closeServiceModal()" class="btn btn-light px-3 py-2"><i class="fas fa-xmark"></i></button>
+            </div>
+            <input id="serviceModalId" type="hidden">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Nome do serviço</label>
+                    <input id="serviceModalName" class="input-field" placeholder="Ex: Corte masculino">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Preço</label>
+                        <input id="serviceModalPrice" type="number" min="0" step="0.01" class="input-field" placeholder="35.00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Duração em minutos</label>
+                        <input id="serviceModalDuration" type="number" min="5" max="480" step="5" class="input-field" placeholder="30">
+                    </div>
+                </div>
+                <label class="flex items-center gap-3 text-sm font-bold text-gray-700">
+                    <input id="serviceModalActive" type="checkbox" checked>
+                    Serviço ativo para clientes
+                </label>
+            </div>
+            <div class="flex gap-3 pt-5 mt-5 border-t border-slate-200">
+                <button onclick="saveServiceModal()" class="btn btn-primary flex-1 py-3"><i class="fas fa-save"></i> Salvar serviço</button>
+                <button onclick="closeServiceModal()" class="btn btn-light flex-1 py-3">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Dia Indisponível -->
+    <div id="unavailableDayModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-2xl animate-fade-in">
+            <div class="flex items-center justify-between gap-4 mb-5">
+                <h2 class="text-2xl font-black text-gray-950">Bloquear dia</h2>
+                <button onclick="closeUnavailableDayModal()" class="btn btn-light px-3 py-2"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input id="unavailableDate" type="date" class="input-field">
+                <select id="unavailableType" class="input-field">
+                    <option value="fechado">Fechado</option>
+                    <option value="feriado">Feriado</option>
+                    <option value="folga">Folga</option>
+                    <option value="manutenção">Manutenção</option>
+                </select>
+                <select id="unavailableBarber" class="input-field"></select>
+                <textarea id="unavailableReason" class="input-field min-h-20" placeholder="Motivo/observação"></textarea>
+                <div class="flex gap-3">
+                    <button onclick="saveUnavailableDay()" class="btn btn-primary flex-1 py-3">Salvar bloqueio</button>
+                    <button onclick="closeUnavailableDayModal()" class="btn btn-light flex-1 py-3">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div id="editModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-lg w-full max-w-md shadow-2xl animate-fade-in">
+            <h2 class="text-2xl font-black text-gray-950 mb-5">Editar agendamento</h2>
+            <div class="space-y-4">
+                <input id="editName" type="text" placeholder="Nome do cliente" class="input-field">
+                <input id="editDate" type="date" class="input-field">
+                <input id="editTime" type="time" class="input-field">
+                <div class="flex gap-3">
+                    <button onclick="salvarEdicao()" class="btn btn-primary flex-1 py-3">Salvar</button>
+                    <button onclick="fecharModal()" class="btn btn-light flex-1 py-3">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Barbeiro -->
+    <div id="barberModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl w-full max-w-xl shadow-2xl animate-fade-in flex flex-col max-h-[92dvh]">
+            <div class="px-6 pt-6 pb-3 flex-shrink-0">
+                <h2 id="barberModalTitle" class="text-2xl font-black text-gray-950">Novo profissional</h2>
+            </div>
+            <div class="overflow-y-auto flex-1 px-6 pb-2">
+            <div class="space-y-4">
+                <input id="barberName" type="text" placeholder="Nome do profissional" class="input-field">
+                <input id="barberSpecialty" type="text" placeholder="Especialidade (ex: Barba e Cabelo)" class="input-field">
+                <input id="barberAdditional" type="text" placeholder="Informações adicionais" class="input-field">
+                <input id="barberPassword" type="password" placeholder="Senha para login (deixe vazio para não criar acesso)" class="input-field">
+                <!-- Chave PIX individual: enviada ao cliente quando ele assina plano com este barbeiro -->
+                <div class="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <label class="block text-xs font-black text-amber-800 mb-1.5 flex items-center gap-1.5">
+                        <i class="fas fa-key text-amber-600"></i> Chave PIX do profissional
+                        <span class="font-normal text-amber-600">(opcional)</span>
+                    </label>
+                    <input id="barberPixKey" type="text" placeholder="CPF, e-mail, telefone ou chave aleatória" class="input-field w-full text-sm">
+                    <p class="text-[11px] text-amber-700 font-semibold mt-1.5">Quando cadastrada, o bot usa esta chave nas assinaturas feitas com este profissional.</p>
+                </div>
+                <div>
+                    <!-- ── Grade de horário semanal ─────────────────────────────────── -->
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
+                        Horário semanal
+                    </p>
+                    <div class="rounded-lg border border-slate-200 overflow-hidden mb-4" id="scheduleGrid">
+                        <!-- cabeçalho -->
+                        <div class="grid bg-slate-50 border-b border-slate-200 text-[11px] font-black text-slate-500 uppercase tracking-wide"
+                             style="grid-template-columns:64px 40px 1fr 1fr">
+                            <div class="px-2 py-1.5">Dia</div>
+                            <div class="py-1.5 text-center">Folga</div>
+                            <div class="px-2 py-1.5">Entrada</div>
+                            <div class="px-2 py-1.5">Saída</div>
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-semibold px-2 pt-1.5 pb-0.5">
+                            ☕ Almoço fixo: 12:00–12:59 (universal)
+                        </p>
+                        <!-- linhas: Seg=1 … Sáb=6, Dom=0 (na ordem visual) -->
+                        <div id="scheduleRows"></div>
+                    </div>
+
+                    <!-- Campos legado (ocultos — ainda enviados para retrocompatibilidade) -->
+                    <input id="barberWorkStart"  type="hidden" value="08:00">
+                    <input id="barberWorkEnd"    type="hidden" value="18:00">
+                    <input id="barberLunchStart" type="hidden" value="">
+                    <input id="barberLunchEnd"   type="hidden" value="">
+
+                    <textarea id="barberBlockedSlots" class="input-field min-h-16 mb-3 text-xs"
+                        placeholder='Bloqueios por data: {"2026-05-18":["10:00","10:30"]}'></textarea>
+                    <textarea id="barberCustomHours" class="input-field min-h-16 mb-4 text-xs"
+                        placeholder='Exceções de data específica: {"2026-12-25":{"closed":true},"2026-12-31":{"start":"09:00","end":"14:00"}}'></textarea>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Cor na Agenda</label>
+                    <input id="barberColor" type="color" class="w-full h-10 rounded-lg cursor-pointer" value="#3498db">
+                </div>
+            </div><!-- /space-y-4 -->
+            </div><!-- /overflow-y-auto -->
+            <div class="px-6 py-4 border-t border-slate-100 flex-shrink-0 flex gap-3">
+                <button id="barberSaveBtn" onclick="saveBarber()" class="btn btn-primary flex-1 py-3">Salvar</button>
+                <button onclick="closeBarberModal()" class="btn btn-light flex-1 py-3">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação Genérico -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden p-4 backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-lg w-full max-w-sm shadow-2xl animate-fade-in">
+            <h2 id="confirmationTitle" class="text-2xl font-black text-gray-950 mb-4">Confirmação</h2>
+            <p id="confirmationMessage" class="text-gray-700 mb-6">Você tem certeza?</p>
+            <div class="flex gap-3 justify-end">
+                <button id="confirmCancelBtn" onclick="closeConfirmationModal(false)" class="btn btn-light py-2">Cancelar</button>
+                <button id="confirmActionBtn" onclick="closeConfirmationModal(true)" class="btn btn-red py-2">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates para Renderização dinâmica (Melhora SEO e Organização) -->
+
+    <!-- Template compacto: uma linha por agendamento — ideal para celular e lista longa -->
+    <template id="tpl-appointment-card-compact">
+        <article class="appointment-card appointment-card--compact border-l-4">
+            <div class="apc-time-col">
+                <time class="apc-time js-time"></time>
+                <span class="apc-date js-date"></span>
+            </div>
+            <span class="apc-status-dot js-status-dot" title=""></span>
+            <div class="apc-info">
+                <span class="apc-name js-name"></span>
+                <span class="apc-service js-service"></span>
+            </div>
+            <span class="apc-barber-dot js-barber-dot" title=""></span>
+            <strong class="apc-price js-price"></strong>
+            <div class="apc-actions">
+                <button class="apc-btn apc-btn--confirm js-btn-confirm" title="Confirmar presença">
+                    <i class="fas fa-check"></i><span class="apc-btn-label">OK</span>
+                </button>
+                <button class="apc-btn apc-btn--edit js-btn-edit" title="Editar">
+                    <i class="fas fa-pen"></i><span class="apc-btn-label">Editar</span>
+                </button>
+                <button class="apc-btn apc-btn--cancel js-btn-cancel" title="Apagar">
+                    <i class="fas fa-trash"></i><span class="apc-btn-label">Apagar</span>
+                </button>
+            </div>
+        </article>
+    </template>
+
+    <template id="tpl-appointment-card">
+        <article class="appointment-card appointment-card-readable soft-panel p-4 border-l-4">
+            <div class="appointment-card-main">
+                <div class="appointment-timebox">
+                    <time class="appointment-time js-time"></time>
+                    <span class="appointment-date js-date"></span>
+                </div>
+                <div class="appointment-person">
+                    <div class="appointment-title-row">
+                        <h4 class="appointment-client js-name"></h4>
+                        <span class="appointment-status text-[10px] px-2 py-0.5 rounded-full font-bold uppercase js-status-badge"></span>
+                    </div>
+                    <p class="appointment-phone js-phone"></p>
+                </div>
+                <div class="appointment-value">
+                    <span class="appointment-value-label">Valor</span>
+                    <strong class="js-price"></strong>
+                </div>
+            </div>
+            <div class="appointment-detail-grid appt-detail-grid-3">
+                <div class="appointment-detail-pill">
+                    <i class="fas fa-scissors" style="color:var(--service-accent,#0f766e);flex-shrink:0"></i>
+                    <span class="js-service"></span>
+                </div>
+                <div class="appointment-detail-pill">
+                    <span class="w-2 h-2 rounded-full flex-shrink-0 js-barber-dot"></span>
+                    <span class="js-barber"></span>
+                </div>
+                <div class="appointment-detail-pill js-duration-pill">
+                    <i class="fas fa-clock" style="opacity:.6;flex-shrink:0"></i>
+                    <span class="js-duration"></span>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 mt-3 js-actions">
+                <button class="btn btn-green text-xs py-2 js-btn-confirm" title="Confirmar presença do cliente" aria-label="Confirmar presença do cliente">
+                    <i class="fas fa-check"></i><span>Presença</span>
+                </button>
+                <button class="btn btn-light text-xs py-2 js-btn-edit" title="Editar agendamento" aria-label="Editar agendamento">
+                    <i class="fas fa-pen"></i><span>Editar</span>
+                </button>
+                <button class="btn btn-red text-xs py-2 js-btn-cancel" title="Cancelar agendamento" aria-label="Cancelar agendamento">
+                    <i class="fas fa-trash"></i><span>Cancelar</span>
+                </button>
+            </div>
+        </article>
+    </template>
+
+
+            <!-- ── Modal: Novo/editar plano ──────────────────────────────────── -->
+            <div id="planModal" class="fixed inset-0 bg-black/50 z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+                <div class="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md p-5 sm:p-6 relative overflow-y-auto max-h-[92vh] sm:max-h-[90vh]">
+                    <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl" onclick="closePlanModal()">✕</button>
+                    <h3 id="planModalTitle" class="text-lg font-black text-gray-950 mb-5">Novo Plano</h3>
+                    <input type="hidden" id="planModalId">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Nome do plano *</label>
+                            <input type="text" id="planModalNome" class="input-field w-full" placeholder="Ex: Plano Mensal">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Descrição</label>
+                            <input type="text" id="planModalDesc" class="input-field w-full" placeholder="Descrição curta para o cliente">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Serviços incluídos no plano *</label>
+                            <select id="planModalServicos" class="input-field w-full">
+                                <option value="*">Todos os serviços</option>
+                                <option value="Corte">Somente Corte</option>
+                                <option value="Barba">Somente Barba</option>
+                                <option value="Corte,Barba,CorteBarba,CorteSobrancelha,CorteBarbasobrancelha">Corte &amp; Barba (todos com corte ou barba)</option>
+                                <option value="Corte,CorteBarba,CorteSobrancelha,CorteBarbasobrancelha">Corte (simples e combos)</option>
+                                <option value="CorteBarba">Somente Corte + Barba</option>
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1">Define quais serviços consomem crédito deste plano.</p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Preço (R$)</label>
+                                <input type="number" id="planModalPreco" class="input-field w-full" placeholder="100" min="0" step="0.01">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Créditos</label>
+                                <input type="number" id="planModalCreditos" class="input-field w-full" placeholder="4" min="1" max="100">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Dias validade</label>
+                                <input type="number" id="planModalDias" class="input-field w-full" placeholder="30" min="1" max="365">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="planModalAtivo" checked class="w-4 h-4">
+                            <label for="planModalAtivo" class="text-sm font-semibold text-gray-700">Plano ativo (visível no bot)</label>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 mt-6">
+                        <button class="btn btn-light flex-1 py-2" onclick="closePlanModal()">Cancelar</button>
+                        <button class="btn btn-primary flex-1 py-2" onclick="savePlan()">Salvar plano</button>
+                    </div>
+                    <p id="planModalMsg" class="text-xs mt-2 text-center hidden"></p>
+                </div>
+            </div>
+
+            <!-- ── Modal: Notas do assinante ────────────────────────────────── -->
+            <div id="subNotesModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-4">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+                    <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-xl" onclick="closeSubNotesModal()">✕</button>
+                    <h3 class="text-lg font-black text-gray-950 mb-4">Observações</h3>
+                    <input type="hidden" id="subNotesId">
+                    <textarea id="subNotesText" class="input-field w-full h-24" placeholder="Anotações internas (comprovante, contato, etc.)"></textarea>
+                    <div class="flex gap-3 mt-4">
+                        <button class="btn btn-light flex-1 py-2" onclick="closeSubNotesModal()">Cancelar</button>
+                        <button class="btn btn-primary flex-1 py-2" onclick="saveSubNotes()">Salvar</button>
+                    </div>
+                </div>
+            </div>
+
+    <audio id="notificationSound" src="/assets/notification.mp3" preload="auto"></audio>
+    <script src="script-dashboard.js?v=17" defer></script>
+</body>
+</html>

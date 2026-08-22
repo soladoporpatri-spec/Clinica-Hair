@@ -1,0 +1,25 @@
+[Unit]
+Description=Barbearia Dashboard API
+After=network.target barbearia-backend.service barbearia-bridge.service
+Requires=barbearia-backend.service
+StartLimitIntervalSec=0
+StartLimitBurst=0
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/barbearia
+EnvironmentFile=/opt/barbearia/.env
+ExecStart=/usr/bin/node /opt/barbearia/api-nythar.js
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+TimeoutStopSec=30
+User=barbearia
+Group=barbearia
+NoNewPrivileges=true
+PrivateTmp=true
+LimitNOFILE=65535
+MemoryMax=768M
+
+[Install]
+WantedBy=multi-user.target

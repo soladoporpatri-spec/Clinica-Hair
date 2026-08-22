@@ -1,0 +1,12 @@
+[Unit]
+Description=Backup diario do banco SQLite da Barbearia
+
+[Service]
+Type=oneshot
+User=barbearia
+Group=barbearia
+EnvironmentFile=/opt/barbearia/.env
+ExecStart=/opt/barbearia/deploy/scripts/backup-sqlite.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ReadWritePaths=/opt/barbearia/data /opt/barbearia/backups

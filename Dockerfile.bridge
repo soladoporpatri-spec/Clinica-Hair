@@ -1,0 +1,20 @@
+FROM node:20-bookworm-slim
+WORKDIR /app
+ENV NODE_ENV=production \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    WHATSAPP_USER_AGENT="Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    ca-certificates \
+    fonts-liberation \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
+    libgbm1 \
+    libasound2 \
+    && rm -rf /var/lib/apt/lists/*
+COPY WhatsAppBridge/package*.json ./
+RUN npm ci --omit=dev
+COPY WhatsAppBridge ./
+EXPOSE 3000
+CMD ["node", "index.js"]

@@ -1,90 +1,140 @@
-# Clínica Hair
+# Nythar - Dashboard & Chatbot
 
-Sistema de atendimento e gestão criado para facilitar a rotina de barbearias. Ele junta agenda, clientes, profissionais, serviços, relatórios e atendimento pelo WhatsApp em um só lugar.
+Sistema de atendimento e gestão para negócios locais. A Nythar junta agenda, clientes, profissionais, serviços, relatórios e atendimento pelo WhatsApp em uma única dashboard.
 
-A ideia é simples: o cliente conversa com o bot, escolhe o que precisa e o sistema organiza tudo na dashboard da barbearia.
+A ideia é simples: o cliente conversa com o chatbot, escolhe o que precisa e o sistema organiza o atendimento para a equipe.
 
 ## O que o sistema faz
 
 - **Agenda completa:** mostra horários marcados, horários livres, bloqueios e calendário.
-- **Agendamento pelo WhatsApp:** o cliente consegue marcar um horário sem precisar ligar para a barbearia.
-- **Meus agendamentos:** consulta os horários que já foram marcados pelo cliente.
-- **Cancelamento e reagendamento:** permite trocar ou cancelar um horário direto pelo atendimento automático.
-- **Cadastro de serviços:** organiza nome, duração e preço de cada serviço oferecido.
-- **Gestão de profissionais:** controla barbeiros, horários de trabalho, pausas, folgas e disponibilidade.
-- **Clientes e CRM:** guarda histórico de visitas e ajuda a acompanhar os clientes mais frequentes.
-- **Clube de fidelidade:** oferece vantagens para clientes cadastrados no clube da barbearia.
+- **Agendamento pelo WhatsApp:** o cliente consegue marcar um horário sem precisar ligar para a loja.
+- **Consulta de agendamentos:** cada cliente pode conferir os próprios horários.
+- **Cancelamento e reagendamento:** permite trocar ou cancelar um atendimento pelo chatbot.
+- **Serviços e profissionais:** organiza preços, duração, expediente, pausas, folgas e disponibilidade.
+- **Clientes e CRM:** guarda histórico de visitas e ajuda a acompanhar clientes frequentes.
+- **Clube de fidelidade:** controla benefícios e usos do clube da loja.
 - **Relatórios:** apresenta informações sobre atendimentos, faturamento, clientes e serviços.
-- **Notificações em tempo real:** avisa a equipe quando acontece um novo agendamento ou alguma alteração importante.
-- **Exportação de dados:** permite trabalhar com Excel, CSV e integração com Google Sheets.
-- **Painel administrativo:** cada loja acessa somente os próprios dados, enquanto o superadmin cuida do sistema inteiro.
+- **Notificações em tempo real:** avisa a equipe quando acontece uma mudança importante.
+- **Exportação:** permite trabalhar com Excel, CSV e Google Sheets.
+- **Várias lojas:** cada empresa acessa somente os próprios dados.
+- **Superadmin:** administra lojas, planos, módulos e o funcionamento geral da plataforma.
 
 ## Como funciona
 
-1. O cliente manda uma mensagem para o WhatsApp da barbearia.
-2. O bot apresenta um menu com as opções disponíveis.
-3. O cliente escolhe o serviço, profissional, data e horário.
-4. O sistema verifica se o horário está realmente livre e salva o agendamento.
-5. A dashboard é atualizada e a equipe recebe a informação do novo atendimento.
+1. O cliente envia uma mensagem para o WhatsApp da loja.
+2. O chatbot apresenta as opções disponíveis.
+3. O cliente escolhe serviço, profissional, data e horário.
+4. O backend confere se o horário ainda está livre.
+5. O agendamento é salvo e aparece na dashboard.
+6. A equipe recebe a atualização em tempo real.
 
-O mesmo fluxo também serve para consultar, cancelar ou reagendar um horário. Se o bot for pausado, a equipe pode continuar atendendo a pessoa manualmente.
+O mesmo fluxo atende consultas, cancelamentos e reagendamentos. Quando o bot é pausado, a equipe pode continuar a conversa manualmente.
 
 ## Partes do projeto
 
-- **Dashboard:** tela usada pela barbearia para acompanhar agenda, clientes, serviços e resultados.
-- **Backend:** cuida das regras do sistema, contas, segurança, horários e dados de cada loja.
-- **Chatbot:** conduz a conversa e transforma as escolhas do cliente em ações no sistema.
-- **WhatsApp Bridge:** faz a ligação entre o WhatsApp Web e o backend.
-- **Superadmin:** área usada para administrar lojas, planos, módulos e funcionamento geral.
-- **Supervisor local:** mantém os serviços funcionando e tenta recuperar automaticamente uma queda.
+- **Dashboard:** interface usada pela loja para acompanhar a operação.
+- **Backend:** aplica as regras, controla horários, contas e dados de cada empresa.
+- **Chatbot:** conduz a conversa e transforma escolhas em ações.
+- **WhatsApp Bridge:** liga o WhatsApp Web ao backend.
+- **Superadmin:** painel geral da plataforma SaaS.
+- **Supervisor local:** inicia, acompanha e recupera os serviços no Windows.
 
 ## Tecnologias usadas
 
 ### Backend
 
-- **C# e .NET 8:** base principal das regras e APIs do sistema.
-- **ASP.NET Core:** recebe e responde as chamadas da dashboard e do bot.
-- **Entity Framework Core:** faz a comunicação entre o sistema e o banco de dados.
-- **SQLite e PostgreSQL:** opções de banco para uso local ou em servidor.
-- **SignalR:** envia notificações e atualizações em tempo real.
-- **JWT e BCrypt:** ajudam a proteger logins, senhas e acessos.
-- **Serilog e Polly:** cuidam de logs, tentativas automáticas e recuperação de falhas.
+- **C# e .NET 8** para as APIs e regras do sistema.
+- **ASP.NET Core** para autenticação, endpoints e serviços em tempo real.
+- **Entity Framework Core** para acesso aos dados.
+- **SQLite** no funcionamento local e **PostgreSQL** como opção de servidor.
+- **SignalR** para notificações instantâneas.
+- **JWT e BCrypt** para proteger acessos e senhas.
+- **Serilog e Polly** para logs, tentativas automáticas e recuperação de falhas.
 
 ### Dashboard
 
-- **HTML, CSS e JavaScript:** formam a interface usada no navegador.
-- **Tailwind CSS:** ajuda a criar uma tela organizada e responsiva.
-- **Chart.js:** monta os gráficos dos relatórios.
-- **Font Awesome:** fornece os ícones da interface.
+- **HTML, CSS e JavaScript** na interface.
+- **Tailwind CSS** para os componentes e o visual responsivo.
+- **Chart.js** para os gráficos.
+- **Font Awesome** para os ícones.
+- **PWA e Service Worker** para instalação no dispositivo e notificações.
 
 ### WhatsApp e integrações
 
-- **Node.js e Express:** executam a dashboard local e os serviços de integração.
-- **whatsapp-web.js e Puppeteer:** conectam o sistema ao WhatsApp Web.
-- **ClosedXML:** cria arquivos do Excel.
-- **Google Sheets:** recebe dados por integração configurável.
+- **Node.js e Express** no proxy local e nos serviços de integração.
+- **whatsapp-web.js e Puppeteer** na conexão com o WhatsApp Web.
+- **ClosedXML** na geração de planilhas Excel.
+- **Google Sheets** por webhook configurável.
 
-### Qualidade
+### Testes
 
-- **xUnit:** testa as regras do backend em C#.
-- **Node Test Runner:** testa o proxy, a dashboard e os arquivos de instalação.
-- **Health checks:** conferem se backend, dashboard e WhatsApp estão funcionando.
+- **xUnit** para o backend em C#.
+- **Node Test Runner** para dashboard, proxy, segurança e empacotamento.
+- **Health checks** para conferir backend, dashboard e WhatsApp Bridge.
 
-## Segurança e organização
+## Estrutura principal
 
-- Cada loja possui acesso separado aos próprios clientes e agendamentos.
+```text
+WhatsAppBot.Worker/   Backend .NET, regras e APIs
+WhatsAppBot.Tests/    Testes automatizados do backend
+WhatsAppBridge/       Integração com o WhatsApp Web
+superadmin/           Painel do superadministrador
+tests/                Testes do Node.js e dos arquivos de entrega
+scripts/              Inicialização, backup, atualização e releases
+deploy/               Arquivos para Docker, Linux e servidor
+docs/                 Guias e explicações técnicas
+api-nythar.js          Servidor local e proxy da dashboard
+dashboard-improved.html Interface operacional
+```
+
+## Rodando em desenvolvimento
+
+### Requisitos
+
+- Node.js 20 LTS ou mais recente.
+- .NET 8 SDK.
+- Google Chrome ou Chromium para o WhatsApp Bridge.
+
+### Preparar o projeto
+
+```powershell
+npm install
+Set-Location WhatsAppBridge
+npm install
+Set-Location ..
+dotnet restore WhatsAppBotSolution.sln
+node scripts/gerar-segredos.js
+```
+
+### Iniciar
+
+```powershell
+npm run supervise
+```
+
+A dashboard local fica disponível em `http://127.0.0.1:4000/dashboard-improved.html`.
+
+### Testar
+
+```powershell
+npm test
+dotnet test WhatsAppBot.Tests/WhatsAppBot.Tests.csproj -c Release
+```
+
+## Segurança
+
+- Dados de cada loja são separados pelo identificador da empresa autenticada.
 - Senhas são protegidas antes de serem salvas.
-- Chaves, sessões do WhatsApp e bancos reais não devem ser publicados no GitHub.
-- O sistema possui controle contra requisições em excesso e acessos não autorizados.
-- Backups e logs ajudam na manutenção sem misturar os dados das lojas.
+- Chaves, bancos reais, logs e sessões do WhatsApp não devem entrar no GitHub.
+- Os exemplos de configuração não possuem credenciais reais.
+- O projeto aplica limitação de requisições e validação de acesso.
+
+## Observação sobre o WhatsApp
+
+A integração usa automação do WhatsApp Web. Ela depende do funcionamento da plataforma e pode precisar de ajustes quando o WhatsApp muda. Use com responsabilidade e respeite as regras do serviço.
 
 ## Objetivo
 
-O Clínica Hair foi criado para diminuir o trabalho manual da barbearia, evitar conflito de horários e deixar o atendimento mais rápido para o cliente e para a equipe.
+O objetivo da Nythar é diminuir tarefas manuais, evitar conflitos de horário e deixar o atendimento mais rápido para clientes e equipes.
 
-O foco é ter uma ferramenta simples de usar no dia a dia, mas com uma estrutura preparada para crescer e atender mais de uma loja.
-
-## Status do projeto
-
-Projeto em desenvolvimento e melhoria contínua, com testes automatizados e versões preparadas para instalação local no Windows ou publicação em servidor.
-
+O projeto continua recebendo melhorias, testes e ajustes de estabilidade.

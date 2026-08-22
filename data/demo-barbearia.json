@@ -1,0 +1,123 @@
+{
+  "store": {
+    "name": "Barbearia Avenida",
+    "slug": "barbearia-avenida-demo",
+    "plan": "Professional",
+    "businessType": "Barbershop",
+    "adminUsername": "demo-dono",
+    "adminPassword": "Demo@2026!"
+  },
+  "businessHours": {
+    "HorarioAbertura": "09:00",
+    "HorarioFechamento": "19:00"
+  },
+  "services": [
+    { "nome": "Corte masculino", "duracaoMinutos": 30, "preco": 35.00, "ativo": true, "ordem": 1 },
+    { "nome": "Barba alinhada", "duracaoMinutos": 25, "preco": 30.00, "ativo": true, "ordem": 2 },
+    { "nome": "Corte + barba", "duracaoMinutos": 55, "preco": 60.00, "ativo": true, "ordem": 3 },
+    { "nome": "Sobrancelha", "duracaoMinutos": 15, "preco": 15.00, "ativo": true, "ordem": 4 },
+    { "nome": "Acabamento", "duracaoMinutos": 20, "preco": 20.00, "ativo": true, "ordem": 5 }
+  ],
+  "professionals": [
+    {
+      "nome": "Rafael Lima",
+      "cor": "#2563eb",
+      "especialidade": "Cortes classicos",
+      "workStart": "09:00",
+      "workEnd": "18:00",
+      "lunchStart": "12:00",
+      "lunchEnd": "13:00",
+      "workingDays": [1, 2, 3, 4, 5, 6]
+    },
+    {
+      "nome": "Bruno Santos",
+      "cor": "#16a34a",
+      "especialidade": "Barba e acabamento",
+      "workStart": "10:00",
+      "workEnd": "19:00",
+      "lunchStart": "13:00",
+      "lunchEnd": "14:00",
+      "workingDays": [1, 2, 3, 4, 5, 6]
+    },
+    {
+      "nome": "Caio Martins",
+      "cor": "#f59e0b",
+      "especialidade": "Degrade e finalizacao",
+      "workStart": "09:00",
+      "workEnd": "17:00",
+      "lunchStart": "12:30",
+      "lunchEnd": "13:30",
+      "workingDays": [2, 3, 4, 5, 6]
+    }
+  ],
+  "clients": [
+    { "nome": "Lucas Mendes", "telefone": "5511991001001" },
+    { "nome": "Andre Oliveira", "telefone": "5511991001002" },
+    { "nome": "Mateus Rocha", "telefone": "5511991001003" },
+    { "nome": "Pedro Almeida", "telefone": "5511991001004" }
+  ],
+  "crm": {
+    "profiles": [
+      {
+        "nome": "Lucas Mendes",
+        "telefone": "5511991001001",
+        "status": "novo",
+        "tags": ["Prefere WhatsApp", "Corte"],
+        "observacoes": "Primeira visita pela demo. Confirmar estilo preferido no proximo atendimento.",
+        "preferencias": "Gosta de corte baixo nas laterais.",
+        "lembrete": "Perguntar se gostou do primeiro atendimento"
+      },
+      {
+        "nome": "Andre Oliveira",
+        "telefone": "5511991001002",
+        "status": "vip",
+        "tags": ["VIP", "Cliente fiel", "Barba"],
+        "observacoes": "Cliente de alto valor. Prefere encaixe no fim da tarde.",
+        "preferencias": "Corte + barba com Bruno.",
+        "lembrete": "Oferecer horario recorrente mensal"
+      },
+      {
+        "nome": "Mateus Rocha",
+        "telefone": "5511991001003",
+        "status": "sumido",
+        "tags": ["Sumido", "Barba", "Promocao"],
+        "observacoes": "Bom candidato para reativacao manual pelo WhatsApp.",
+        "preferencias": "Barba alinhada sem retirar volume.",
+        "lembrete": "Enviar sugestao de retorno esta semana"
+      },
+      {
+        "nome": "Pedro Almeida",
+        "telefone": "5511991001004",
+        "status": "recorrente",
+        "tags": ["Atencao especial", "Sobrancelha"],
+        "observacoes": "Evitar atrasos; cliente costuma vir no fim do expediente.",
+        "preferencias": "Acabamento rapido.",
+        "lembrete": "Confirmar preferencia de horario"
+      }
+    ]
+  },
+  "appointments": [
+    { "cliente": "Lucas Mendes", "telefone": "5511991001001", "servico": "Corte masculino", "profissional": "Rafael Lima", "daysFromToday": 1, "hora": "10:00", "notes": "Demo: primeira visita" },
+    { "cliente": "Andre Oliveira", "telefone": "5511991001002", "servico": "Corte + barba", "profissional": "Bruno Santos", "daysFromToday": 1, "hora": "14:30", "notes": "Demo: cliente recorrente" },
+    { "cliente": "Mateus Rocha", "telefone": "5511991001003", "servico": "Barba alinhada", "profissional": "Caio Martins", "daysFromToday": 2, "hora": "11:00", "notes": "Demo: atendimento de barba" },
+    { "cliente": "Pedro Almeida", "telefone": "5511991001004", "servico": "Acabamento", "profissional": "Rafael Lima", "daysFromToday": 3, "hora": "16:00", "notes": "Demo: encaixe de acabamento" }
+  ],
+  "messages": {
+    "Msg_Welcome": "Ola, {nome}! Bem-vindo a {loja}. Escolha uma opcao para agendar seu horario.",
+    "Msg_Confirmation": "Confirmar agendamento? Data: {data} | Servico: {servico} | Profissional: {barbeiro} | Valor: {preco}",
+    "Msg_Reminder24h": "Ola, {nome}! Lembrete: amanha as {horario} voce tem {servico} na {loja}.",
+    "Msg_Reminder1h": "Falta 1 hora, {nome}! Te esperamos as {horario} para {servico}.",
+    "Msg_Thanks": "Obrigado pela preferencia, {nome}! Esperamos que tenha gostado do atendimento.",
+    "Active_Reminder24h": "true",
+    "Active_Reminder1h": "true",
+    "Active_Thanks": "true",
+    "Active_Retention": "true",
+    "Retention_Days": "21",
+    "Msg_Retention": "Ola, {nome}! Faz tempo que voce nao passa na {loja}. Quer renovar o corte esta semana?"
+  },
+  "botScenario": {
+    "mode": "simulado",
+    "bridgeUrl": "http://127.0.0.1:3002",
+    "expected": "A demo pode ser apresentada com WhatsApp em QR Code real ou simulando mensagens pelo endpoint interno."
+  }
+}

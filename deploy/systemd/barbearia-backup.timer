@@ -1,0 +1,10 @@
+[Unit]
+Description=Executa backup diario da Barbearia
+
+[Timer]
+OnCalendar=*-*-* 03:15:00
+Persistent=true
+Unit=barbearia-backup.service
+
+[Install]
+WantedBy=timers.target

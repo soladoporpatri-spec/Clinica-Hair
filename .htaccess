@@ -1,0 +1,15 @@
+AuthType Basic
+AuthName "Nythar - Dashboard e Chatbot - Acesso Privado"
+AuthUserFile /var/www/nythar/.htpasswd
+Require valid-user
+
+# Protege dados sensíveis
+<Files "agendamentos.db">
+Order allow,deny
+Deny from all
+</Files>
+
+# HTTPS forçado
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

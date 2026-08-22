@@ -1,0 +1,10 @@
+FROM node:20-bookworm-slim
+WORKDIR /app
+ENV NODE_ENV=production PORT=4000
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY api-nythar.js dashboard-improved.html script-dashboard.js style-dashboard.css login.html manifest.json ./
+COPY assets ./assets
+COPY superadmin ./superadmin
+EXPOSE 4000
+CMD ["node", "api-nythar.js"]

@@ -1,0 +1,417 @@
+NYTHAR - DASHBOARD & CHATBOT - TUTORIAL DE USO DO SISTEMA
+=========================================
+
+Este guia explica como usar o sistema no dia a dia.
+Ele nao fala sobre instalacao, apenas sobre operacao.
+
+
+1. COMO ABRIR A DASHBOARD
+-------------------------
+
+1. Inicie o sistema pelo atalho "Nythar - Dashboard & Chatbot - Iniciar".
+2. Abra o navegador.
+3. Acesse:
+
+   http://127.0.0.1:4000/dashboard-improved.html
+
+4. Entre com o usuario e senha cadastrados.
+
+
+2. VISAO GERAL DA DASHBOARD
+---------------------------
+
+A dashboard mostra:
+
+- Agendamentos de hoje.
+- Proximos agendamentos.
+- Faturamento.
+- Tempo total de atendimentos.
+- Status do WhatsApp.
+- Status do bot.
+- Relatorios.
+- Barbeiros/profissionais.
+- Configuracoes da loja.
+
+Use o menu lateral para navegar entre as abas.
+
+
+3. AGENDA
+---------
+
+Na aba Agenda voce acompanha os atendimentos.
+
+Funcoes principais:
+
+- Ver agendamentos do dia.
+- Ver agendamentos futuros.
+- Filtrar por barbeiro.
+- Confirmar presenca.
+- Editar horario.
+- Cancelar agendamento.
+- Criar agendamento manual.
+
+
+4. CRIAR AGENDAMENTO MANUAL
+---------------------------
+
+1. Clique em "Novo agendamento".
+2. Preencha:
+   - Nome do cliente.
+   - Telefone/WhatsApp.
+   - Servico.
+   - Profissional.
+   - Data.
+   - Horario.
+   - Observacoes, se necessario.
+3. O sistema vai mostrar apenas horarios disponiveis.
+4. Clique em "Salvar agendamento".
+
+Importante:
+
+- O sistema bloqueia horarios passados.
+- O sistema respeita horario de trabalho do barbeiro.
+- O sistema respeita almoco/pausas.
+- O sistema respeita dias fechados ou indisponiveis.
+- Se nao aparecer horario, verifique se o barbeiro trabalha naquele dia.
+
+
+5. DIAS INDISPONIVEIS
+---------------------
+
+Use esta funcao para bloquear dias sem atendimento.
+
+Exemplos:
+
+- Feriado.
+- Folga.
+- Manutencao.
+- Loja fechada.
+
+Como usar:
+
+1. Abra a agenda/configuracoes de disponibilidade.
+2. Clique para bloquear um dia.
+3. Escolha a data.
+4. Escolha o tipo de bloqueio.
+5. Escolha se vale para todos ou para um barbeiro especifico.
+6. Salve.
+
+Depois disso, o sistema nao vai oferecer horarios naquele dia.
+
+
+6. BOT WHATSAPP
+---------------
+
+Na aba "Bot WhatsApp" voce controla a conexao com o WhatsApp da barbearia.
+
+Status principais:
+
+- Online: WhatsApp conectado e pronto.
+- Offline: WhatsApp nao conectado.
+- Aguardando QR Code: precisa escanear.
+- Pausado: bot nao responde automaticamente.
+
+
+7. CONECTAR WHATSAPP PELO QR CODE
+---------------------------------
+
+1. Abra a aba "Bot WhatsApp".
+2. Clique no botao "QR".
+3. Aguarde alguns segundos.
+4. Quando aparecer o QR Code:
+   - Abra o WhatsApp da barbearia no celular.
+   - Toque em "Aparelhos conectados".
+   - Toque em "Conectar aparelho".
+   - Aponte a camera para o QR Code.
+5. Aguarde o status mudar para online.
+
+Observacao:
+
+Se o sistema acabou de ser instalado ou se a sessao foi encerrada,
+e normal aparecer WhatsApp offline ate gerar e escanear o QR Code.
+
+
+8. PAUSAR OU ATIVAR O BOT
+-------------------------
+
+Use o botao "Ativar/Pausar" na aba Bot WhatsApp.
+
+Quando o bot esta ativo:
+
+- Ele responde clientes automaticamente.
+- Ele ajuda no fluxo de agendamento.
+- Ele envia perguntas e opcoes pelo WhatsApp.
+
+Quando o bot esta pausado:
+
+- Ele nao responde automaticamente.
+- As mensagens podem ficar pendentes para retomar depois.
+
+Use "Pausar" quando quiser atender manualmente pelo WhatsApp.
+
+
+9. NOTIFICACOES DE NOVOS AGENDAMENTOS
+-------------------------------------
+
+Quando um novo agendamento e criado, a dashboard pode mostrar:
+
+- Alerta visual.
+- Som.
+- Notificacao do navegador.
+- Atualizacao automatica da agenda.
+
+Para funcionar melhor:
+
+1. Deixe a dashboard aberta.
+2. Permita notificacoes no navegador quando ele pedir.
+3. No celular, use a dashboard aberta no navegador.
+
+
+10. BARBEIROS / PROFISSIONAIS
+-----------------------------
+
+Na aba de barbeiros voce pode:
+
+- Criar profissional.
+- Editar nome.
+- Editar especialidade.
+- Ativar/inativar.
+- Definir cor.
+- Definir horario de trabalho.
+- Definir horario de almoco.
+- Definir dias de trabalho.
+- Definir horarios bloqueados.
+- Definir horarios personalizados.
+
+Dica:
+
+Se um barbeiro nao aparece com horario disponivel em certa data,
+verifique:
+
+- Se ele esta ativo.
+- Se trabalha naquele dia da semana.
+- Se o horario esta dentro do expediente.
+- Se existe bloqueio ou pausa.
+
+
+11. RELATORIOS
+--------------
+
+Na aba Relatorios voce pode analisar:
+
+- Total de agendamentos.
+- Faturamento estimado.
+- Faturamento realizado.
+- Presenca confirmada.
+- Clientes novos.
+- Clientes recorrentes.
+- Servicos mais vendidos.
+- Desempenho por barbeiro.
+- Horarios de maior movimento.
+
+Voce pode filtrar por:
+
+- Periodo.
+- Barbeiro.
+- Servico.
+- Status.
+
+Tambem pode exportar relatorios em CSV.
+
+
+12. CONFIGURACOES DA LOJA
+-------------------------
+
+Na aba Configuracoes voce pode ajustar:
+
+- Horario de abertura.
+- Horario de fechamento.
+- Limite diario por servico.
+- Duracao dos servicos.
+- Mensagem de retencao.
+- Google Sheets.
+- Dependencias do sistema.
+
+Depois de alterar, clique em "Salvar Alteracoes".
+
+
+13. EXPORTAR PLANILHA
+---------------------
+
+Use a funcao de exportacao para gerar planilha com dados do sistema.
+
+Normalmente a planilha inclui:
+
+- Agendamentos.
+- Clientes.
+- Profissionais.
+- Financeiro.
+- Logs.
+
+
+14. GOOGLE SHEETS - PARA QUE SERVE
+----------------------------------
+
+O Google Sheets serve para manter uma planilha online sincronizada
+com os dados do sistema.
+
+Ele pode receber:
+
+- Agendamentos.
+- Clientes.
+- Profissionais.
+- Dados financeiros.
+- Logs do sistema.
+
+Isso ajuda a acompanhar tudo pelo Google Drive.
+
+
+15. GOOGLE SHEETS - COMO CONFIGURAR
+-----------------------------------
+
+Voce precisa criar uma planilha no Google Sheets e um Apps Script.
+
+Passo 1 - Criar a planilha
+
+1. Acesse:
+
+   https://sheets.google.com
+
+2. Crie uma nova planilha.
+3. De um nome, por exemplo:
+
+   Nythar - Dashboard & Chatbot - Controle
+
+
+Passo 2 - Abrir Apps Script
+
+1. Dentro da planilha, clique em:
+
+   Extensoes > Apps Script
+
+2. Apague o codigo existente.
+3. Cole o codigo de integracao fornecido pelo responsavel do sistema.
+4. Salve o projeto.
+
+
+Passo 3 - Publicar como aplicativo da web
+
+1. Clique em "Implantar".
+2. Clique em "Nova implantacao".
+3. Escolha o tipo:
+
+   Aplicativo da web
+
+4. Em "Executar como", selecione:
+
+   Eu
+
+5. Em "Quem pode acessar", selecione:
+
+   Qualquer pessoa
+
+6. Clique em "Implantar".
+7. Autorize as permissoes solicitadas pelo Google.
+8. Copie a URL gerada do aplicativo da web.
+
+Essa URL normalmente comeca com:
+
+   https://script.google.com/macros/s/...
+
+
+Passo 4 - Colar URL na dashboard
+
+1. Abra a dashboard.
+2. Va em "Configuracoes".
+3. Procure a area "Google Sheets".
+4. Cole a URL do Apps Script.
+5. Clique em "Salvar Alteracoes".
+6. Clique em "Testar".
+
+Se estiver correto, o sistema vai enviar os dados para a planilha.
+
+
+16. GOOGLE SHEETS - COMO SINCRONIZAR
+------------------------------------
+
+Depois de configurado:
+
+1. Va em "Configuracoes".
+2. Clique no botao "Testar" da area Google Sheets.
+3. Aguarde a mensagem de sucesso.
+
+O sistema tambem pode atualizar a planilha automaticamente em alguns momentos,
+como criacao de agendamento e inicializacao/encerramento do sistema.
+
+
+17. GOOGLE SHEETS - PROBLEMAS COMUNS
+------------------------------------
+
+Problema: apareceu erro ao testar.
+
+Verifique:
+
+- Se a URL foi colada inteira.
+- Se o Apps Script foi implantado como "Aplicativo da web".
+- Se o acesso esta como "Qualquer pessoa".
+- Se voce autorizou as permissoes do Google.
+- Se a planilha nao foi apagada ou movida.
+
+Problema: os dados nao aparecem.
+
+Verifique:
+
+- Se esta usando a URL da implantacao, nao a URL do editor.
+- Se clicou em "Salvar Alteracoes" depois de colar a URL.
+- Se clicou em "Testar".
+- Se o Apps Script esta usando a planilha correta.
+
+Problema: pediu permissao do Google.
+
+Isso e normal na primeira implantacao.
+Autorize com a conta dona da planilha.
+
+
+18. BOAS PRATICAS DE USO
+------------------------
+
+- Mantenha o computador ligado durante o horario de atendimento.
+- Deixe a dashboard aberta.
+- Nao feche a janela preta do sistema enquanto estiver usando.
+- Confirme presenca dos clientes quando necessario.
+- Mantenha os horarios dos barbeiros atualizados.
+- Bloqueie feriados e folgas com antecedencia.
+- Verifique o status do WhatsApp no inicio do dia.
+- Se o WhatsApp cair, use "Nythar - Dashboard & Chatbot - Reparar WhatsApp" e aguarde ate 60 segundos.
+- Nao execute o instalador novamente e nao gere outro QR em uma queda comum.
+
+
+19. QUANDO CHAMAR SUPORTE
+-------------------------
+
+Chame suporte se:
+
+- O sistema nao abrir.
+- O WhatsApp nao gerar QR Code.
+- O QR Code nao conectar.
+- A agenda nao carregar.
+- Os horarios disponiveis estiverem incorretos.
+- O Google Sheets parar de sincronizar.
+- Aparecer erro repetido na dashboard.
+
+
+20. RESUMO RAPIDO DO DIA A DIA
+------------------------------
+
+1. Abrir o sistema.
+2. Entrar na dashboard.
+3. Conferir se WhatsApp esta online.
+4. Conferir agenda do dia.
+5. Criar agendamentos manuais quando necessario.
+6. Confirmar/cancelar/editar horarios.
+7. Acompanhar notificacoes.
+8. No fim do dia, conferir relatorios.
+
+
+FIM DO TUTORIAL
+===============

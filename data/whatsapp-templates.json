@@ -1,0 +1,6 @@
+{
+  "welcome": "Ola, {nome}! Bem-vindo a {loja}.\n\nEscolha uma opcao:\n1 - Agendar horario\n2 - Meus agendamentos\n3 - Cancelar agendamento",
+  "confirmation": "Agendamento confirmado! ✅\n\n📅 Data: {data}\n✂️ Serviço: {servico}\n💈 Profissional: {profissional}\n⏰ Horário: {hora}",
+  "reminder": "Ola, {nome}. Passando para lembrar do seu horario em {data} para {servico}.",
+  "cancellation": "Seu agendamento de {data} foi cancelado.\n\nDigite oi para marcar um novo horario."
+}

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nythar - SaaS para negócios locais</title>
+    <meta name="description" content="A Nythar conecta agenda, clientes, WhatsApp, relatórios e automações em um SaaS para barbearias, lavajatos e lojas de tecnologia.">
+    <meta name="theme-color" content="#050505">
+    <meta name="nythar-pix-key" content="">
+    <meta name="nythar-sales-whatsapp" content="">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23f20707'/%3E%3Cpath d='M36 5 13 36h19l-5 23 24-34H32z' fill='%23fff'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Epilogue:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#hero">Pular para o conteúdo</a>
+    <div class="site-shell">
+        <header class="site-header" data-reveal>
+            <nav class="nav-bar" aria-label="Navegação principal">
+                <a href="#hero" class="logo" aria-label="NYTHAR, voltar ao início">
+                    <span class="logo-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>
+                    </span>
+                    <span class="logo-copy">
+                        <span class="logo-name">NYTHAR</span>
+                        <span class="logo-sub">SaaS local</span>
+                    </span>
+                </a>
+
+                <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="primaryMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div class="nav-panel" id="primaryMenu">
+                    <div class="nav-links">
+                        <a href="#hero" class="is-active">Início</a>
+                        <a href="#servicos">Plataforma</a>
+                        <a href="#sobre">SaaS</a>
+                        <a href="#precos">Planos</a>
+                        <a href="#clientes">Clientes</a>
+                        <a href="#processo">Como Funciona</a>
+                    </div>
+                    <div class="nav-actions">
+                        <button class="nav-login" type="button" data-open-login>
+                            <i class="fas fa-desktop" aria-hidden="true"></i>
+                            Entrar na dashboard
+                        </button>
+                        <a href="#cta-final" class="btn btn-nav-cta">
+                            Solicitar acesso
+                            <i class="fas fa-comment" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main>
+            <section id="hero" class="hero-section">
+                <div class="hero-grid section-wrap">
+                    <div class="hero-copy" data-hero-copy>
+                        <div class="hero-badge" aria-label="Identidade criativa Nythar">
+                            <strong>NYTHAR</strong>
+                            <span>Rebeldes Criativos</span>
+                        </div>
+                        <p class="section-kicker">
+                            <span></span>
+                            SaaS comercial para negócios locais
+                        </p>
+                        <h1 class="hero-title comic-title">
+                            <span>Gestão, bot e dashboard</span>
+                            <span>para negócios <strong>menos manuais.</strong></span>
+                        </h1>
+                        <p class="hero-text">A Nythar centraliza agenda, clientes, serviços, WhatsApp, relatórios e organização financeira para barbearias, lavajatos e lojas de tecnologia ou otimização de computadores.</p>
+                        <div class="hero-actions" aria-label="Ações principais">
+                            <a href="#precos" class="btn btn-primary">
+                                Conhecer planos
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </a>
+                            <button class="btn btn-ghost" type="button" data-open-login>
+                                Entrar na dashboard
+                                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="hero-proof" aria-label="Destaques da Nythar">
+                            <span>Agenda e serviços</span>
+                            <span>CRM de clientes</span>
+                            <span>Bot WhatsApp</span>
+                            <span>Relatórios claros</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-stage" aria-hidden="true" data-hero-stage>
+                        <div class="comic-hero-panel">
+                            <div class="speech-card">
+                                <span>Fale Conosco</span>
+                                <i class="fas fa-comment" aria-hidden="true"></i>
+                            </div>
+                            <svg class="comic-scene" viewBox="0 0 760 540" focusable="false" aria-hidden="true">
+                                <defs>
+                                    <pattern id="nythar-dots" width="14" height="14" patternUnits="userSpaceOnUse">
+                                        <circle cx="3" cy="3" r="2" fill="currentColor" opacity=".34"/>
+                                    </pattern>
+                                    <linearGradient id="slash-white" x1="0" x2="1">
+                                        <stop offset="0" stop-color="#ffffff"/>
+                                        <stop offset=".72" stop-color="#f7f5ef"/>
+                                        <stop offset="1" stop-color="#050505"/>
+                                    </linearGradient>
+                                </defs>
+
+                                <g class="scene-frame">
+                                    <path d="M52 62 720 18 742 472 86 520 16 182Z"/>
+                                    <path d="M78 92 704 54 720 452 100 492 44 188Z"/>
+                                </g>
+
+                                <g class="scene-rings">
+                                    <circle cx="520" cy="226" r="42"/>
+                                    <circle cx="520" cy="226" r="86"/>
+                                    <circle cx="520" cy="226" r="132"/>
+                                    <circle cx="520" cy="226" r="178"/>
+                                    <circle cx="520" cy="226" r="224"/>
+                                </g>
+
+                                <g class="scene-bursts">
+                                    <path d="M104 130 440 224"/>
+                                    <path d="M120 344 492 244"/>
+                                    <path d="M188 74 526 220"/>
+                                    <path d="M284 490 548 256"/>
+                                    <path d="M74 438 474 252"/>
+                                </g>
+
+                                <g class="scene-city">
+                                    <path d="M68 405 108 405 108 283 138 266 158 405 205 405 205 228 250 208 274 405 318 405 318 262 356 242 392 405 438 405 438 178 490 154 526 405 564 405 564 222 608 196 634 405 700 405 700 455 68 490Z"/>
+                                    <path d="M102 304h22m0 28h-22m0 28h22M226 246h26m0 30h-26m0 30h26m86-20h24m0 28h-24m0 28h24m96-142h34m0 30h-34m0 30h34m84-18h24m0 28h-24m0 28h24"/>
+                                </g>
+
+                                <g class="scene-operator">
+                                    <path class="operator-shadow" d="M430 492c-12-72 6-139 50-194l-49-35 53-62 61-23 73 22 50 70-44 30c32 54 48 114 49 180Z"/>
+                                    <path class="operator-coat" d="M450 492c-4-81 14-143 56-188l-46-43 38-52 48-20 58 17 42 58-50 38c44 48 63 109 66 190Z"/>
+                                    <path class="operator-collar" d="M463 304 548 260 646 304 594 332 542 300Z"/>
+                                    <path class="operator-head" d="M508 169c9-45 78-55 101-15 24 43-5 95-54 93-42-2-58-37-47-78Z"/>
+                                    <path class="operator-hair" d="M505 167c21-48 90-61 124-20-16-2-27 2-35 12 20-1 35 7 45 24-21-9-40-8-56 4 11 4 20 11 27 22-28-14-59-12-94 6-21-14-25-30-11-48Z"/>
+                                    <path class="operator-mask" d="M519 192 554 178 604 193 571 210Z"/>
+                                    <path class="operator-mask-cut" d="M548 192 566 187 590 195 570 202Z"/>
+                                    <path class="operator-arm left-arm" d="M490 330 386 416 354 480 402 492 454 420 522 366Z"/>
+                                    <path class="operator-arm right-arm" d="M614 326 704 398 735 468 690 490 650 424 590 366Z"/>
+                                </g>
+
+                                <g class="scene-slashes">
+                                    <path d="M8 470 746 362 760 398 28 524Z"/>
+                                    <path d="M38 92 742 66 748 92 56 136Z"/>
+                                    <path d="M598 28 736 20 690 152 560 168Z"/>
+                                </g>
+
+                                <g class="scene-stars">
+                                    <path d="M162 176 178 210 216 202 190 230 206 266 170 248 142 276 148 236 112 220 152 212Z"/>
+                                    <path d="M676 360 688 382 714 384 696 402 702 428 678 416 656 432 660 406 638 392 664 386Z"/>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quick-panels" aria-label="Segmentos atendidos pela Nythar">
+                <div class="quick-panel-grid section-wrap">
+                    <article class="quick-panel" data-reveal>
+                        <span>01</span>
+                        <i class="fas fa-scissors" aria-hidden="true"></i>
+                        <h3>Barbearias</h3>
+                        <p>Agenda por profissional, serviços, CRM, lembretes e WhatsApp para reduzir atendimento manual.</p>
+                        <a href="#servicos">Saiba mais <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    </article>
+                    <article class="quick-panel" data-reveal>
+                        <span>02</span>
+                        <i class="fas fa-car-side" aria-hidden="true"></i>
+                        <h3>Lavajatos</h3>
+                        <p>Controle de serviços recorrentes, clientes, horários, equipe e operação do dia.</p>
+                        <a href="#precos">Saiba mais <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    </article>
+                    <article class="quick-panel" data-reveal>
+                        <span>03</span>
+                        <i class="fas fa-microchip" aria-hidden="true"></i>
+                        <h3>Tecnologia</h3>
+                        <p>Fila de atendimentos, equipamentos, pacotes de otimização e histórico do cliente.</p>
+                        <a href="#precos">Saiba mais <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    </article>
+                    <article class="quick-panel" data-reveal>
+                        <span>04</span>
+                        <i class="fas fa-bolt" aria-hidden="true"></i>
+                        <h3>Operações locais</h3>
+                        <p>Dashboard, bot, relatórios e automações para negócios com agenda e atendimento recorrente.</p>
+                        <a href="#processo">Saiba mais <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    </article>
+                </div>
+            </section>
+
+            <section class="service-strip" aria-label="Recursos em destaque">
+                <div class="strip-track">
+                    <div class="strip-group">
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Agenda inteligente</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Bot WhatsApp</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Clientes e CRM</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Relatórios</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Serviços e preços</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Planilhas organizadas</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Multiempresa</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Dashboard operacional</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Agenda</span>
+                    </div>
+                    <div class="strip-group" aria-hidden="true">
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Agenda inteligente</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Bot WhatsApp</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Clientes e CRM</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Relatórios</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Serviços e preços</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Planilhas organizadas</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Multiempresa</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Dashboard operacional</span>
+                        <span><i class="fas fa-bolt" aria-hidden="true"></i>Agenda</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="servicos" class="panel-section services-section">
+                <div class="section-wrap">
+                    <div class="section-heading split-heading" data-reveal>
+                        <div>
+                            <p class="section-kicker"><span></span>Plataforma</p>
+                            <h2>O sistema que <strong>segura a rotina.</strong></h2>
+                        </div>
+                        <p>Uma base SaaS para controlar agenda, clientes, serviços, WhatsApp, relatórios e operação sem espalhar tudo em conversas e planilhas soltas.</p>
+                    </div>
+
+                    <div class="services-grid">
+                        <article class="service-card" data-reveal>
+                            <span class="card-index">01</span>
+                            <div class="icon-box"><i class="fas fa-calendar-check" aria-hidden="true"></i></div>
+                            <h3>Agenda operacional</h3>
+                            <span class="benefit-chip">Organiza horários</span>
+                            <p>Agendamentos manuais e pelo bot, serviços com duração e preço, horários livres e controle por profissional ou operação.</p>
+                            <span class="card-tag">Agenda clara</span>
+                        </article>
+                        <article class="service-card" data-reveal>
+                            <span class="card-index">02</span>
+                            <div class="icon-box"><i class="fas fa-address-card" aria-hidden="true"></i></div>
+                            <h3>Clientes e CRM</h3>
+                            <span class="benefit-chip">Melhora retorno</span>
+                            <p>Histórico de visitas, preferências, tags, lembretes internos e ações assistidas para reativar clientes sem campanha invasiva.</p>
+                            <span class="card-tag">Relacionamento</span>
+                        </article>
+                        <article class="service-card" data-reveal>
+                            <span class="card-index">03</span>
+                            <div class="icon-box"><i class="fab fa-whatsapp" aria-hidden="true"></i></div>
+                            <h3>Bot WhatsApp</h3>
+                            <span class="benefit-chip">Reduz atendimento manual</span>
+                            <p>Fluxos para agendar, cancelar, consultar horários, responder clientes e conectar o atendimento ao painel da loja.</p>
+                            <span class="card-tag">Automação 24/7</span>
+                        </article>
+                        <article class="service-card" data-reveal>
+                            <span class="card-index">04</span>
+                            <div class="icon-box"><i class="fas fa-screwdriver-wrench" aria-hidden="true"></i></div>
+                            <h3>Serviços e operação</h3>
+                            <span class="benefit-chip">Padroniza o negócio</span>
+                            <p>Cadastro de serviços, preços, duração, profissionais, pacotes e regras básicas para cada tipo de empresa.</p>
+                            <span class="card-tag">Controle diário</span>
+                        </article>
+                        <article class="service-card" data-reveal>
+                            <span class="card-index">05</span>
+                            <div class="icon-box"><i class="fas fa-file-invoice-dollar" aria-hidden="true"></i></div>
+                            <h3>Financeiro simples</h3>
+                            <span class="benefit-chip">Organiza números</span>
+                            <p>Indicadores de receita, serviços mais usados, clientes, planilhas e visão clara para acompanhar o resultado.</p>
+                            <span class="card-tag">Sem bagunça</span>
+                        </article>
+                        <article class="service-card" data-reveal>
+                            <span class="card-index">06</span>
+                            <div class="icon-box"><i class="fas fa-chart-bar" aria-hidden="true"></i></div>
+                            <h3>Relatórios e multi-tenant</h3>
+                            <span class="benefit-chip">Cada loja no seu espaço</span>
+                            <p>Dashboard por empresa, dados separados por loja, relatórios e estrutura pronta para evoluir por segmento.</p>
+                            <span class="card-tag">SaaS escalável</span>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sobre" class="about-section">
+                <div class="about-grid section-wrap">
+                    <div class="about-copy" data-reveal>
+                        <p class="section-kicker dark-kicker"><span></span>Sobre o SaaS</p>
+                        <h2>Uma operação local com <strong>cara de empresa organizada.</strong></h2>
+                        <p>A NYTHAR nasceu para tirar negócios pequenos do improviso: menos conversa perdida, menos planilha confusa e mais controle sobre agenda, clientes, serviços e atendimento.</p>
+                        <p>A primeira frente comercial é barbearia, mas a estrutura já atende operações parecidas como lavajatos, lojas de tecnologia e empresas de otimização de computadores.</p>
+                        <a href="#processo" class="btn btn-dark">
+                            Conhecer o processo
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                    <div class="impact-board" data-reveal>
+                        <div class="impact-card">
+                            <i class="fas fa-compass-drafting" aria-hidden="true"></i>
+                            <strong>01</strong>
+                            <span>Operação antes da tela</span>
+                        </div>
+                        <div class="impact-card">
+                            <i class="fas fa-screwdriver-wrench" aria-hidden="true"></i>
+                            <strong>02</strong>
+                            <span>Dashboard, bot e dados</span>
+                        </div>
+                        <blockquote>
+                            <i class="fas fa-quote-left" aria-hidden="true"></i>
+                            <p>Para a Nythar, tecnologia boa é aquela que o dono entende, a equipe usa e o cliente sente na rotina.</p>
+                            <cite>Posicionamento NYTHAR</cite>
+                        </blockquote>
+                    </div>
+                </div>
+            </section>
+
+            <section id="precos" class="panel-section pricing-section">
+                <div class="section-wrap">
+                    <div class="section-heading centered-heading" data-reveal>
+                        <p class="section-kicker"><span></span>Planos e entrada</p>
+                        <h2>Comece pelo essencial e <strong>evolua com a operação.</strong></h2>
+                        <p>Escolha uma implantação inicial ou uma assinatura SaaS para manter agenda, WhatsApp, clientes e relatórios no mesmo lugar.</p>
+                    </div>
+
+                    <div class="pricing-tabs" role="tablist" aria-label="Categorias de preço" data-reveal>
+                        <button class="tab-btn is-active" type="button" role="tab" aria-selected="true" aria-controls="projetos" id="tab-projetos" data-tab-target="projetos">Implantação</button>
+                        <button class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="assinaturas" id="tab-assinaturas" data-tab-target="assinaturas">Assinatura SaaS</button>
+                    </div>
+
+                    <div id="projetos" class="pricing-grid pricing-content is-active" role="tabpanel" aria-labelledby="tab-projetos">
+                        <article class="pricing-card" data-reveal>
+                            <div class="plan-name">Diagnóstico e demo</div>
+                            <div class="plan-price"><span>A partir de R$</span><strong>800</strong></div>
+                            <div class="plan-meta">
+                                <span>Entrada guiada</span>
+                                <span>Foco em operação</span>
+                            </div>
+                            <p>Mapeamento do negócio, configuração inicial e demonstração com fluxo real para decidir com segurança.</p>
+                            <ul>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Levantamento de agenda e serviços</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Configuração de loja teste</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Fluxo de WhatsApp simulado</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Checklist de implantação</li>
+                            </ul>
+                            <a href="#cta-final" class="btn btn-card">Solicitar diagnóstico</a>
+                        </article>
+                        <article class="pricing-card featured-card" data-reveal>
+                            <span class="feature-badge">Mais comercial</span>
+                            <div class="plan-name">Implantação SaaS</div>
+                            <div class="plan-price"><span>A partir de R$</span><strong>1.500</strong></div>
+                            <div class="plan-meta">
+                                <span>Loja pronta</span>
+                                <span>Treinamento incluso</span>
+                            </div>
+                            <p>Configuração da loja, serviços, equipe, horários, mensagens, dashboard e validação antes de operar.</p>
+                            <ul>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Dashboard configurada</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Serviços, preços e duração</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Mensagens automáticas básicas</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Teste de agenda e relatórios</li>
+                            </ul>
+                            <a href="#cta-final" class="btn btn-card btn-card-red">Implantar minha loja</a>
+                        </article>
+                        <article class="pricing-card" data-reveal>
+                            <div class="plan-name">Fluxo personalizado</div>
+                            <div class="plan-price"><span>A partir de R$</span><strong>3.000</strong></div>
+                            <div class="plan-meta">
+                                <span>Segmento específico</span>
+                                <span>Pronto para evoluir</span>
+                            </div>
+                            <p>Adaptação do SaaS para uma operação local com particularidades de atendimento, status e relatórios.</p>
+                            <ul>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Campos e termos por segmento</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Fluxos de atendimento ajustados</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Indicadores operacionais</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Treinamento e acompanhamento</li>
+                            </ul>
+                            <a href="#cta-final" class="btn btn-card">Planejar meu segmento</a>
+                        </article>
+                    </div>
+
+                    <div id="assinaturas" class="pricing-grid pricing-content" role="tabpanel" aria-labelledby="tab-assinaturas" hidden>
+                        <article class="pricing-card" data-reveal>
+                            <div class="plan-name">Starter Local</div>
+                            <div class="plan-price monthly"><span>R$</span><strong>59</strong><em>/mês</em></div>
+                            <div class="plan-meta">
+                                <span>Entrada SaaS</span>
+                                <span>Agenda + bot</span>
+                            </div>
+                            <ul>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Dashboard da loja</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Agenda e serviços</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Bot WhatsApp básico</li>
+                                <li class="off"><i class="fas fa-times" aria-hidden="true"></i>CRM avançado</li>
+                            </ul>
+                            <button type="button" class="btn btn-card" data-pix-plan="Starter Local" data-pix-price="59">Pagar com PIX</button>
+                        </article>
+                        <article class="pricing-card featured-card" data-reveal>
+                            <span class="feature-badge">Piloto recomendado</span>
+                            <div class="plan-name">Profissional</div>
+                            <div class="plan-price monthly"><span>R$</span><strong>299</strong><em>/mês</em></div>
+                            <div class="plan-meta">
+                                <span>Operação completa</span>
+                                <span>CRM + relatórios</span>
+                            </div>
+                            <ul>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Tudo do Starter</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>CRM, tags e lembretes</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Relatórios e planilhas</li>
+                                <li><i class="fas fa-check" aria-hidden="true"></i>Multi-profissionais ou fila técnica</li>
+                            </ul>
+                            <button type="button" class="btn btn-card btn-card-red" data-pix-plan="Profissional" data-pix-price="299">Assinar com PIX</button>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clientes" class="clients-section">
+                <div class="section-wrap">
+                    <div class="section-heading split-heading" data-reveal>
+                        <div>
+                            <p class="section-kicker"><span></span>Clientes e ecossistema</p>
+                            <h2>Casos que mostram <strong>o SaaS funcionando.</strong></h2>
+                        </div>
+                        <p>Negócios reais e marcas do ecossistema Nythar usando automação, gestão e experiência digital de forma prática.</p>
+                    </div>
+
+                    <div class="clients-grid">
+                        <article class="client-card" data-reveal>
+                            <div class="client-header">
+                                <div>
+                                    <h3>Barbearia parceira</h3>
+                                    <p>Barbearia - Anápolis, GO</p>
+                                </div>
+                                <span>Ativo</span>
+                            </div>
+                            <div class="case-grid">
+                                <div>
+                                    <small>Desafio</small>
+                                    <p>Organizar atendimentos, reduzir tarefas manuais e centralizar informações da operação.</p>
+                                </div>
+                                <div>
+                                    <small>Solução</small>
+                                    <p>Automação, agenda, planilhas melhor organizadas, serviços e dashboard para gestão.</p>
+                                </div>
+                            </div>
+                            <blockquote>"Uma barbearia parceira conseguiu organizar melhor seus atendimentos, reduzir tarefas manuais e centralizar informações importantes com as automações e ferramentas de gestão da Nythar."</blockquote>
+                            <div class="chips">
+                                <span>Chatbot WhatsApp</span>
+                                <span>Dashboard</span>
+                                <span>Planilhas</span>
+                            </div>
+                        </article>
+                        <a class="client-card client-link-card" href="https://synthoptimizer.com/" target="_blank" rel="noopener noreferrer" data-reveal aria-label="Abrir site da Synth Optimizer em nova aba">
+                            <div class="client-header">
+                                <div>
+                                    <h3>Synth Optimizer</h3>
+                                    <p>Tecnologia e otimização de computadores</p>
+                                </div>
+                                <span>Site externo</span>
+                            </div>
+                            <div class="case-grid">
+                                <div>
+                                    <small>Segmento</small>
+                                    <p>Loja de tecnologia com foco em otimização de computadores e desempenho.</p>
+                                </div>
+                                <div>
+                                    <small>Ecossistema</small>
+                                    <p>Representa a modalidade de tecnologia e otimização dentro da Nythar.</p>
+                                </div>
+                            </div>
+                            <blockquote>"Synth Optimizer — otimização de computadores com foco em desempenho, organização e experiência real para o cliente."</blockquote>
+                            <div class="chips">
+                                <span>Otimização</span>
+                                <span>Computadores</span>
+                                <span>Abrir site <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="processo" class="process-section panel-section">
+                <div class="section-wrap">
+                    <div class="section-heading centered-heading" data-reveal>
+                        <p class="section-kicker"><span></span>Como funciona</p>
+                        <h2>Da conversa à loja <strong>operando no painel.</strong></h2>
+                    </div>
+
+                    <div class="process-grid">
+                        <article class="process-step" data-reveal>
+                            <span>01</span>
+                            <h3>Diagnóstico da operação</h3>
+                            <p>Entendemos seu segmento, horários, serviços, equipe, WhatsApp e principais gargalos do dia a dia.</p>
+                        </article>
+                        <article class="process-step" data-reveal>
+                            <span>02</span>
+                            <h3>Configuração da loja</h3>
+                            <p>Criamos ou ajustamos a empresa no SaaS com serviços, preços, mensagens, usuários e regras básicas.</p>
+                        </article>
+                        <article class="process-step" data-reveal>
+                            <span>03</span>
+                            <h3>Teste de fluxo real</h3>
+                            <p>Validamos agenda, bot, clientes, relatórios, dashboard e acesso do administrador antes da entrega.</p>
+                        </article>
+                        <article class="process-step" data-reveal>
+                            <span>04</span>
+                            <h3>Entrega e evolução</h3>
+                            <p>Você recebe acesso, orientação de uso e um caminho claro para evoluir recursos conforme a loja cresce.</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section id="criativos" class="creative-section">
+                <div class="section-wrap">
+                    <div class="creative-panel" data-reveal>
+                        <div class="section-heading centered-heading">
+                            <p class="section-kicker"><span></span>Complementos comerciais</p>
+                            <h2>Além do SaaS, sua entrada <strong>também vende.</strong></h2>
+                        </div>
+                        <div class="creative-grid">
+                            <article class="creative-card">
+                                <i class="fas fa-layer-group" aria-hidden="true"></i>
+                                <h3>Landing comercial</h3>
+                                <p>Página de entrada para explicar sua loja, captar contatos e direcionar clientes ao WhatsApp.</p>
+                                <strong>A partir de R$ 600</strong>
+                            </article>
+                            <article class="creative-card">
+                                <i class="fas fa-th-large" aria-hidden="true"></i>
+                                <h3>Materiais de lançamento</h3>
+                                <p>Posts, cards e textos para comunicar a novidade da agenda e do atendimento automatizado.</p>
+                                <strong>Packs a partir de R$ 400</strong>
+                            </article>
+                            <article class="creative-card">
+                                <i class="fas fa-video" aria-hidden="true"></i>
+                                <h3>Conteúdo curto</h3>
+                                <p>Vídeos rápidos para mostrar serviços, bastidores, antes/depois e chamadas para agendamento.</p>
+                                <strong>A partir de R$ 150/vídeo</strong>
+                            </article>
+                        </div>
+                        <a href="#contato" class="btn btn-primary" data-sales-whatsapp data-whatsapp-message="Quero conhecer a Nythar">
+                            Solicitar pacote comercial
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cta-final" class="final-cta">
+                <div class="section-wrap">
+                    <div class="final-panel" data-reveal>
+                        <p class="section-kicker"><span></span>Entrada comercial</p>
+                        <h2>Sua operação não precisa continuar <strong>manual.</strong></h2>
+                        <p>Solicite acesso, escolha seu segmento e veja como a Nythar pode organizar agenda, WhatsApp, clientes e relatórios da sua empresa.</p>
+                        <div class="cta-actions">
+                            <a href="#contato" class="btn btn-primary" data-sales-whatsapp data-whatsapp-message="Quero conhecer os planos da Nythar">
+                                <i class="fab fa-whatsapp" aria-hidden="true"></i>
+                                Solicitar demonstração
+                            </a>
+                            <button class="btn btn-ghost" type="button" data-open-login>
+                                <i class="fas fa-desktop" aria-hidden="true"></i>
+                                Acessar minha conta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <a href="#hero" class="logo" aria-label="NYTHAR, voltar ao início">
+                    <span class="logo-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>
+                    </span>
+                    <span class="logo-copy">
+                        <span class="logo-name">NYTHAR</span>
+                        <span class="logo-sub">SaaS local</span>
+                    </span>
+                </a>
+                <p>© 2026 Nythar. Todos os direitos reservados.</p>
+                <div class="footer-socials" aria-label="Redes sociais">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin" aria-hidden="true"></i></a>
+                    <a href="#contato" aria-label="WhatsApp" data-sales-whatsapp data-whatsapp-message="Quero conhecer a Nythar"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle" hidden>
+        <div class="modal">
+            <button class="modal-close" type="button" data-close-login aria-label="Fechar modal">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <h2 id="loginTitle">Acessar dashboard</h2>
+            <p class="modal-sub">Use as mesmas credenciais da sua loja. A Nythar redireciona você para a dashboard correta do seu tenant.</p>
+            <form id="landingLoginForm" novalidate>
+                <div class="form-group">
+                    <label for="loginUser">Usuário</label>
+                    <input id="loginUser" name="Username" type="text" placeholder="Seu usuário" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha</label>
+                    <input id="loginPassword" name="Password" type="password" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+                <p class="login-status" id="landingLoginStatus" role="status" aria-live="polite"></p>
+                <button class="btn-login-submit" type="submit" data-login-submit>
+                    Entrar no Painel
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+            <p class="modal-note">Não tem acesso? <a href="#contato" data-sales-whatsapp data-whatsapp-message="Quero solicitar acesso ao SaaS Nythar">Fale com a Nythar</a></p>
+        </div>
+    </div>
+    <div class="modal-overlay" id="pixModal" role="dialog" aria-modal="true" aria-labelledby="pixTitle" hidden>
+        <div class="modal modal-pix">
+            <button class="modal-close" type="button" data-close-pix aria-label="Fechar modal PIX">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <h2 id="pixTitle">Pagamento PIX</h2>
+            <p class="modal-sub">Pague a assinatura e envie o comprovante para liberar ou renovar o acesso da loja pelo Super Admin.</p>
+            <div class="pix-summary">
+                <span id="pixPlanName">Assinatura Nythar</span>
+                <strong id="pixPlanPrice">R$ 0,00</strong>
+            </div>
+            <div class="pix-qr-wrap" aria-live="polite">
+                <img id="pixQrImage" class="pix-qr-image" src="" alt="QR Code PIX para pagamento da assinatura Nythar" hidden>
+                <div id="pixQrFallback" class="pix-qr-fallback" hidden>Gerando QR Code PIX...</div>
+            </div>
+            <div class="pix-field">
+                <label for="pixKeyInput">Chave PIX</label>
+                <div class="pix-copy-row">
+                    <input id="pixKeyInput" type="text" readonly value="" placeholder="Configure a chave PIX no ambiente">
+                    <button type="button" data-copy-pix-key>Copiar</button>
+                </div>
+            </div>
+            <div class="pix-field">
+                <label for="pixCopyCode">PIX copia e cola</label>
+                <textarea id="pixCopyCode" rows="5" readonly></textarea>
+                <button class="pix-copy-main" type="button" data-copy-pix-code>
+                    <i class="fas fa-copy" aria-hidden="true"></i>
+                    Copiar PIX copia e cola
+                </button>
+            </div>
+            <p class="login-status pix-status" id="pixStatus" role="status" aria-live="polite"></p>
+            <a id="pixWhatsapp" class="btn-login-submit pix-whatsapp" href="#" target="_blank" rel="noopener noreferrer" hidden>
+                Enviar comprovante no WhatsApp
+                <i class="fab fa-whatsapp" aria-hidden="true"></i>
+            </a>
+            <p class="modal-note">A liberacao e manual apos conferencia do pagamento.</p>
+        </div>
+    </div>
+</body>
+</html>

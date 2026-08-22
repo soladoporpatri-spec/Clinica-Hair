@@ -1,0 +1,138 @@
+{
+  "store": {
+    "name": "CoreBoost Otimizacoes",
+    "slug": "coreboost-otimizacoes",
+    "businessType": "ComputerOptimization",
+    "plan": "Professional",
+    "adminUsername": "coreboost-admin",
+    "adminPassword": "CoreBoost@2030"
+  },
+  "services": [
+    { "name": "Otimizacao basica Windows", "durationMinutes": 60, "price": 90 },
+    { "name": "Otimizacao gamer", "durationMinutes": 90, "price": 140 },
+    { "name": "Formatacao + drivers", "durationMinutes": 150, "price": 220 },
+    { "name": "Limpeza de inicializacao", "durationMinutes": 45, "price": 70 },
+    { "name": "Configuracao PC novo", "durationMinutes": 75, "price": 120 },
+    { "name": "Pacote completo performance", "durationMinutes": 180, "price": 300 }
+  ],
+  "customers": [
+    { "name": "Lucas Andrade", "phone": "11988887777" },
+    { "name": "Marina Costa", "phone": "21977776666" },
+    { "name": "Rafael Lima", "phone": "31966665555" },
+    { "name": "Bianca Souza", "phone": "41955554444" }
+  ],
+  "devices": [
+    {
+      "customerName": "Lucas Andrade",
+      "phoneNumber": "11988887777",
+      "deviceType": "Desktop",
+      "operatingSystem": "Windows 11",
+      "processor": "Ryzen 5 5600",
+      "gpu": "RTX 3060",
+      "ramGb": 16,
+      "storageType": "NVMe",
+      "mainUse": "Jogos",
+      "notes": "Queda de FPS em jogos competitivos."
+    },
+    {
+      "customerName": "Marina Costa",
+      "phoneNumber": "21977776666",
+      "deviceType": "Notebook",
+      "operatingSystem": "Windows 10",
+      "processor": "Core i5 8250U",
+      "gpu": "Integrada",
+      "ramGb": 8,
+      "storageType": "SSD",
+      "mainUse": "Trabalho",
+      "notes": "Inicializacao lenta e muitos programas abrindo junto."
+    },
+    {
+      "customerName": "Rafael Lima",
+      "phoneNumber": "31966665555",
+      "deviceType": "Desktop",
+      "operatingSystem": "Windows 11",
+      "processor": "Core i7 10700",
+      "gpu": "GTX 1660 Super",
+      "ramGb": 16,
+      "storageType": "Misto",
+      "mainUse": "Edicao",
+      "notes": "Precisa formatar e reinstalar drivers."
+    },
+    {
+      "customerName": "Bianca Souza",
+      "phoneNumber": "41955554444",
+      "deviceType": "Notebook",
+      "operatingSystem": "Windows 11",
+      "processor": "Ryzen 7 5700U",
+      "gpu": "Integrada",
+      "ramGb": 12,
+      "storageType": "SSD",
+      "mainUse": "Estudo",
+      "notes": "Computador novo para configurar programas essenciais."
+    }
+  ],
+  "tickets": [
+    {
+      "ticketNumber": "OPT-DEMO-001",
+      "customerName": "Lucas Andrade",
+      "phoneNumber": "11988887777",
+      "serviceName": "Otimizacao gamer",
+      "serviceMode": "Remoto",
+      "goal": "Melhorar FPS",
+      "reportedProblem": "Quedas de FPS em jogos competitivos e input lag.",
+      "urgency": "Hoje",
+      "status": "EmOtimizacao",
+      "estimatedAmount": 140
+    },
+    {
+      "ticketNumber": "OPT-DEMO-002",
+      "customerName": "Marina Costa",
+      "phoneNumber": "21977776666",
+      "serviceName": "Limpeza de inicializacao",
+      "serviceMode": "Presencial",
+      "goal": "Deixar Windows mais rapido",
+      "reportedProblem": "Notebook demora para ligar e travamentos ao abrir navegador.",
+      "urgency": "Essa semana",
+      "status": "AguardandoCliente",
+      "estimatedAmount": 70
+    },
+    {
+      "ticketNumber": "OPT-DEMO-003",
+      "customerName": "Rafael Lima",
+      "phoneNumber": "31966665555",
+      "serviceName": "Formatacao + drivers",
+      "serviceMode": "EntregaNaLoja",
+      "goal": "Formatar",
+      "reportedProblem": "Sistema instavel depois de varias instalacoes antigas.",
+      "urgency": "Essa semana",
+      "status": "Pronto",
+      "estimatedAmount": 220,
+      "finalAmount": 220
+    },
+    {
+      "ticketNumber": "OPT-DEMO-004",
+      "customerName": "Bianca Souza",
+      "phoneNumber": "41955554444",
+      "serviceName": "Configuracao PC novo",
+      "serviceMode": "Presencial",
+      "goal": "Configurar PC novo",
+      "reportedProblem": "Precisa configurar programas, energia e orientacoes iniciais.",
+      "urgency": "Sem pressa",
+      "status": "Novo",
+      "estimatedAmount": 120
+    },
+    {
+      "ticketNumber": "OPT-DEMO-005",
+      "customerName": "Lucas Andrade",
+      "phoneNumber": "11988887777",
+      "serviceName": "Pacote completo performance",
+      "serviceMode": "Remoto",
+      "goal": "Configurar jogos",
+      "reportedProblem": "Revisao completa apos troca de monitor.",
+      "urgency": "Sem pressa",
+      "status": "Concluido",
+      "estimatedAmount": 300,
+      "finalAmount": 300
+    }
+  ]
+}

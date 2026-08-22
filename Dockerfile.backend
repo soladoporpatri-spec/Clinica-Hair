@@ -1,0 +1,17 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim-arm64v8 AS build
+WORKDIR /src
+COPY WhatsAppBot.Worker/WhatsAppBot.Worker.csproj WhatsAppBot.Worker/
+RUN dotnet restore WhatsAppBot.Worker/WhatsAppBot.Worker.csproj
+COPY WhatsAppBot.Worker WhatsAppBot.Worker
+RUN dotnet publish WhatsAppBot.Worker/WhatsAppBot.Worker.csproj -c Release -r linux-arm64 --self-contained false -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-bookworm-slim-arm64v8
+WORKDIR /app
+COPY --from=build /app/publish .
+ENV ASPNETCORE_URLS=http://0.0.0.0:5000 \
+    BARBEARIA_DATA_DIR=/data \
+    BACKUP_DIR=/backups \
+    LOG_DIR=/logs
+RUN mkdir -p /data /backups /logs
+EXPOSE 5000
+ENTRYPOINT ["dotnet", "WhatsAppBot.Worker.dll"]
