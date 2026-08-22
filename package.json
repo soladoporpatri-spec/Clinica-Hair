@@ -1,7 +1,7 @@
 {
   "name": "nythar-dashboard",
   "version": "2.0.0",
-  "description": "Nythar - Dashboard & Chatbot para negócios locais com agenda, WhatsApp, CRM e automações",
+  "description": "Projeto de dashboard e chatbot para negócios locais, com agenda, clientes, serviços e atendimento pelo WhatsApp",
   "main": "api-nythar.js",
   "scripts": {
     "start": "node api-nythar.js",

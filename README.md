@@ -1,8 +1,8 @@
 # Nythar - Dashboard & Chatbot
 
-Sistema de atendimento e gestão para negócios locais. A Nythar junta agenda, clientes, profissionais, serviços, relatórios e atendimento pelo WhatsApp em uma única dashboard.
+Projeto de software criado para facilitar o atendimento e a organização de negócios locais. Ele reúne agenda, clientes, profissionais, serviços, relatórios e atendimento pelo WhatsApp em uma única dashboard.
 
-A ideia é simples: o cliente conversa com o chatbot, escolhe o que precisa e o sistema organiza o atendimento para a equipe.
+O funcionamento é simples: o cliente conversa com o chatbot, escolhe o que precisa e o projeto ajuda a organizar essas informações para a equipe responsável pelo atendimento.
 
 ## O que o sistema faz
 

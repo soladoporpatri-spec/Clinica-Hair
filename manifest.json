@@ -1,7 +1,7 @@
 {
   "name": "Nythar - Dashboard & Chatbot",
   "short_name": "Nythar",
-  "description": "Dashboard operacional para negócios locais: agenda, WhatsApp, clientes, relatórios e notificações.",
+  "description": "Projeto de dashboard e chatbot para negócios locais, com agenda, clientes, serviços, relatórios e atendimento pelo WhatsApp.",
   "id": "/dashboard-improved.html",
   "start_url": "/dashboard-improved.html",
   "scope": "/",
