@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#17131c">
+    <meta name="description" content="Demonstração interativa do projeto Nythar - Dashboard & Chatbot.">
+    <title>Demonstração | Nythar</title>
+    <link rel="stylesheet" href="demo.css">
+    <script src="demo.js" defer></script>
+</head>
+<body>
+    <div class="demo-banner"><strong>Modo demonstração</strong><span>Dados fictícios • nenhuma mensagem real será enviada</span><a href="../">Voltar ao projeto</a></div>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="logo" href="../"><span>N</span><div><strong>Nythar</strong><small>Dashboard &amp; Chatbot</small></div></a>
+            <nav aria-label="Seções da demonstração">
+                <button class="nav-item active" data-view="inicio"><span>⌂</span>Visão geral</button>
+                <button class="nav-item" data-view="agenda"><span>▣</span>Agenda</button>
+                <button class="nav-item" data-view="clientes"><span>♙</span>Clientes</button>
+                <button class="nav-item" data-view="servicos"><span>✦</span>Serviços</button>
+                <button class="nav-item" data-view="chatbot"><span>◉</span>Chatbot</button>
+                <button class="nav-item" data-view="relatorios"><span>↗</span>Relatórios</button>
+            </nav>
+            <div class="sidebar-foot"><span class="avatar">CH</span><div><strong>Clínica Modelo</strong><small>Ambiente fictício</small></div></div>
+        </aside>
+
+        <main>
+            <header class="page-header">
+                <button class="menu-button" type="button" aria-label="Abrir menu">☰</button>
+                <div><span class="today-label"></span><h1 id="pageTitle">Visão geral</h1></div>
+                <div class="header-actions"><button class="ghost-button" id="resetDemo">Reiniciar dados</button><button class="primary-button" data-open-appointment>+ Novo agendamento</button></div>
+            </header>
+
+            <section class="view active" id="view-inicio">
+                <div class="welcome-card"><div><span>Resumo da operação</span><h2>Boa tarde! A agenda está organizada.</h2><p>Explore as seções ou simule uma conversa no chatbot.</p></div><button class="light-button" data-go-chatbot>Testar chatbot →</button></div>
+                <div class="metric-grid">
+                    <article><span class="metric-icon purple">▣</span><div><small>Agendamentos hoje</small><strong id="metricToday">0</strong><em>atendimentos</em></div></article>
+                    <article><span class="metric-icon green">✓</span><div><small>Confirmados</small><strong id="metricConfirmed">0</strong><em>na agenda</em></div></article>
+                    <article><span class="metric-icon blue">♙</span><div><small>Clientes</small><strong id="metricClients">0</strong><em>cadastrados</em></div></article>
+                    <article><span class="metric-icon orange">R$</span><div><small>Valor previsto</small><strong id="metricRevenue">R$ 0</strong><em>nesta amostra</em></div></article>
+                </div>
+                <div class="content-grid">
+                    <article class="panel appointments-panel"><div class="panel-head"><div><span>Agenda de hoje</span><h3>Próximos atendimentos</h3></div><button class="text-button" data-go-agenda>Ver agenda →</button></div><div id="todayAppointments" class="appointment-list"></div></article>
+                    <article class="panel"><div class="panel-head"><div><span>Ocupação semanal</span><h3>Agendamentos por dia</h3></div></div><div class="mini-chart" id="miniChart"></div><div class="chart-legend"><span><i></i>Agendamentos</span><strong id="weekTotal">0 na semana</strong></div></article>
+                </div>
+            </section>
+
+            <section class="view" id="view-agenda">
+                <div class="section-toolbar"><div><p>Todos os horários criados nesta demonstração.</p></div><button class="primary-button" data-open-appointment>+ Novo agendamento</button></div>
+                <article class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Data e hora</th><th>Cliente</th><th>Serviço</th><th>Profissional</th><th>Valor</th><th>Status</th></tr></thead><tbody id="appointmentsTable"></tbody></table></div><div id="agendaEmpty" class="empty-state" hidden>Nenhum agendamento encontrado.</div></article>
+            </section>
+
+            <section class="view" id="view-clientes">
+                <div class="section-toolbar"><p>Clientes reunidos a partir dos agendamentos fictícios.</p><label class="search">⌕ <input id="clientSearch" type="search" placeholder="Buscar cliente"></label></div>
+                <div class="card-grid" id="clientsGrid"></div>
+            </section>
+
+            <section class="view" id="view-servicos">
+                <div class="section-toolbar"><p>Catálogo usado pelo fluxo de agendamento demonstrativo.</p></div>
+                <div class="service-grid" id="servicesGrid"></div>
+            </section>
+
+            <section class="view" id="view-chatbot">
+                <div class="chat-layout">
+                    <article class="chat-info"><span class="section-tag">SIMULAÇÃO INTERATIVA</span><h2>Veja o fluxo pelo ponto de vista do cliente.</h2><p>Escolha as opções no celular ao lado. Ao confirmar, o agendamento aparecerá na agenda e nos indicadores.</p><ul><li>✓ Nenhuma conexão com WhatsApp</li><li>✓ Nenhum dado é enviado</li><li>✓ Resultado salvo apenas neste navegador</li></ul><button class="ghost-button" id="restartChat">Recomeçar conversa</button></article>
+                    <article class="phone"><div class="phone-head"><span class="chat-avatar">N</span><div><strong>Clínica Modelo</strong><small>online • demonstração</small></div></div><div class="messages" id="chatMessages" aria-live="polite"></div><div class="chat-options" id="chatOptions"></div></article>
+                </div>
+            </section>
+
+            <section class="view" id="view-relatorios">
+                <div class="section-toolbar"><p>Indicadores gerados em tempo real com os dados da demonstração.</p></div>
+                <div class="report-grid"><article class="panel report-main"><div class="panel-head"><div><span>Serviços mais escolhidos</span><h3>Distribuição dos atendimentos</h3></div></div><div id="serviceReport" class="report-bars"></div></article><article class="panel"><div class="panel-head"><div><span>Resumo</span><h3>Estado da agenda</h3></div></div><div id="statusReport" class="donut-wrap"></div></article></div>
+            </section>
+        </main>
+    </div>
+
+    <dialog id="appointmentDialog">
+        <form method="dialog" id="appointmentForm">
+            <div class="dialog-head"><div><span>Novo atendimento</span><h2>Criar agendamento</h2></div><button class="icon-button" value="cancel" aria-label="Fechar">×</button></div>
+            <p class="dialog-note">Os dados ficam somente neste navegador.</p>
+            <div class="form-grid">
+                <label class="full">Nome do cliente<input name="client" required maxlength="60" placeholder="Ex.: Ana Souza"></label>
+                <label>Telefone<input name="phone" inputmode="tel" maxlength="20" placeholder="(62) 99999-9999"></label>
+                <label>Serviço<select name="service" id="formService" required></select></label>
+                <label>Profissional<select name="professional" required><option>Itamar</option><option>Marcos</option><option>Camila</option></select></label>
+                <label>Data<input name="date" id="formDate" type="date" required></label>
+                <label>Horário<select name="time" required><option>09:00</option><option>10:30</option><option>13:30</option><option>15:00</option><option>16:30</option><option>18:00</option></select></label>
+            </div>
+            <div class="dialog-actions"><button class="ghost-button" value="cancel">Cancelar</button><button class="primary-button" value="default" type="submit">Salvar agendamento</button></div>
+        </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

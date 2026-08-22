@@ -4,6 +4,14 @@ Projeto de software criado para facilitar o atendimento e a organização de neg
 
 O funcionamento é simples: o cliente conversa com o chatbot, escolhe o que precisa e o projeto ajuda a organizar essas informações para a equipe responsável pelo atendimento.
 
+## Demonstração online
+
+[Abrir a demonstração pública](https://soladoporpatri-spec.github.io/Nythar-Dashboard-Chatbot/)
+
+A versão online funciona inteiramente no navegador com dados fictícios. Ela permite criar agendamentos, testar o fluxo do chatbot e conferir agenda, clientes, serviços e relatórios sem enviar mensagens reais ou exigir credenciais.
+
+O WhatsApp real, o banco de dados e as automações do backend continuam disponíveis na instalação completa, pois precisam de processos permanentes que não fazem parte da demonstração estática.
+
 ## O que o sistema faz
 
 - **Agenda completa:** mostra horários marcados, horários livres, bloqueios e calendário.
